@@ -1,0 +1,35 @@
+extends layout
+
+block content
+  h1.h2 New User
+  hr
+  form(method='post')
+    div.form-group
+      label(for='username') Username
+      input.form-control(name='username', id='username', placeholder='Unique username', required, autofocus)
+
+    div.form-group
+      label(for='email') Email
+      input.form-control(name='email', id='email', placeholder='email1@gmail.com, email2@yahoo.com')
+
+    div.form-group
+      label(for='role') Role
+      select.form-control(name='role', id='role', required)
+          option(selected) USER
+          option ADMIN
+
+    div.form-group
+      label(for='password') Password
+      input.form-control(name='password', id='password', placeholder='Password', required, type='password')
+
+    div.form-group
+      label(for='passwordConfirmation') Confirm Password
+      input.form-control(name='passwordConfirmation', id='passwordConfirmation', placeholder='Confirm Password', required, type='password')
+
+    hr
+
+    div.row
+      div.col-md-3
+        button.btn.btn-secondary.btn-block(type='submit') Save
+
+    include mixins/_errors

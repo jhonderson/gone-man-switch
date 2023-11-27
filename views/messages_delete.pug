@@ -1,0 +1,49 @@
+extends layout
+
+block content
+  h1.h2 Delete Message
+
+  hr
+  h1.h3.mb-3.font-weight-normal Content
+
+  dl.row
+    dt.col.sm-2 Recipients
+    dd.col-sm-10= message.recipients
+  dl.row
+    dt.col.sm-2 Subject
+    dd.col-sm-10= message.subject
+  dl.row
+    dt.col.sm-2 Body
+    if message.encryption == 'encrypted_custom_encryption_password'
+      dd.col-sm-10
+        a.text-muted(href='/messages/decrypt/' + message.encryptionPayload, target='_blank')
+          | Decrypt Message Body
+          | #{' '}
+          i.fa.fa-external-link(arial-hidden)
+    else
+      dd.col-sm-10
+        pre= message.body
+  dl.row
+    dt.col.sm-2 Attachment
+    dd.col-sm-10
+      a.text-muted(href='/messages/' + message.id + '/attachment/download')= message.attachmentName
+
+  hr
+  h1.h3.mb-3.font-weight-normal Check-in Configuration
+
+  dl.row
+    dt.col.sm-7 Send me a check-in notification every...
+    dd.col-sm-5 #{message.checkinFrequencyTime} #{message.checkinFrequencyTimeUnit}
+  dl.row
+    dt.col.sm-7 Deliver this message if I don't respond to my check-in notification after...
+    dd.col-sm-5 #{message.checkinWaitingTime} #{message.checkinWaitingTimeUnit}
+
+  hr
+
+  form(action='/messages/' + message.id + '/delete?confirm=true')
+    input(type='hidden', name='confirm', value='true')
+    div.row
+      div.col-md-3
+        button.btn.btn-md.btn-block.btn-secondary(type='submit') Delete
+
+  include mixins/_message_errors

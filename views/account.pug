@@ -1,0 +1,41 @@
+extends layout
+
+block content
+  h1.h2 Account
+  hr
+  form(method='post')
+    div.form-group
+      label(for='id') Id
+      input.form-control(name='id', id='id', readonly, value=user.id)
+
+    div.form-group
+      label(for='username') Username
+      input.form-control(name='username', id='username', placeholder='Unique username', required, autofocus, value=user.username)
+
+    div.form-group
+      label(for='email') Email
+      input.form-control(name='email', id='email', placeholder='email1@gmail.com, email2@yahoo.com', value=user.email)
+
+    div.form-group
+      label(for='role') Role
+      input.form-control(name='role', id='role', readonly, value=user.role)
+
+    div.form-group
+      label(for='currentPassword') Current Password
+      input.form-control(name='currentPassword', id='currentPassword', placeholder='Only when changing your password', type='password')
+
+    div.form-group
+      label(for='newPassword') New Password
+      input.form-control(name='newPassword', id='newPassword', placeholder='Only when changing your password', type='password')
+
+    div.form-group
+      label(for='passwordConfirmation') Confirm Password
+      input.form-control(name='passwordConfirmation', id='passwordConfirmation', placeholder='Only when changing your password', type='password')
+
+    hr
+
+    div.row
+      div.col-md-2
+        button.btn.btn-secondary.btn-block(type='submit') Update
+
+    include mixins/_errors

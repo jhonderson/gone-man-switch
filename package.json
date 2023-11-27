@@ -1,0 +1,29 @@
+{
+  "name": "gone-man-switch",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "start": "node ./bin/www"
+  },
+  "dependencies": {
+    "bcrypt": "^5.1.1",
+    "cookie-parser": "~1.4.6",
+    "cookie-session": "^2.0.0",
+    "debug": "~4.3.4",
+    "express": "~4.18.2",
+    "express-async-handler": "^1.2.0",
+    "express-validator": "^7.0.1",
+    "http-errors": "~2.0.0",
+    "morgan": "~1.10.0",
+    "multer": "^1.4.5-lts.1",
+    "node-schedule": "^2.1.1",
+    "nodemailer": "^6.9.7",
+    "pug": "3.0.2",
+    "sqlite": "^5.1.1",
+    "sqlite3": "^5.1.6",
+    "winston": "^3.11.0"
+  },
+  "devDependencies": {
+    "dotenv": "^16.3.1"
+  }
+}

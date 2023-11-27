@@ -1,0 +1,43 @@
+
+.site-header {
+  line-height: 1;
+  border-bottom: 1px solid #e5e5e5;
+}
+
+.site-menu {
+  line-height: 1;
+  border-bottom: 1px solid #e5e5e5;
+}
+
+.site-header-logo {
+  font-family: "Playfair Display", Georgia, "Times New Roman", serif;
+  font-size: 2.25rem;
+}
+
+.site-footer {
+  padding: 1rem 0;
+  color: #999;
+  text-align: center;
+  background-color: #f9f9f9;
+  border-top: .05rem solid #e5e5e5;
+}
+
+.login-form {
+  width: 100%;
+  max-width: 330px;
+  padding: 15px;
+  margin: 10px auto 30px auto;
+}
+
+main.container {
+  min-height: 210px;
+  margin-bottom: 20px;
+}
+
+[data-toggle="collapse"] .fa:after {  
+  content: "\f139";
+}
+
+[data-toggle="collapse"].collapsed .fa:after {
+  content: "\f13a";
+}

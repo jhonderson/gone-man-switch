@@ -1,0 +1,80 @@
+extends layout
+
+block content
+  h1.h2 System Settings
+  p For each setting you'll see a descriptive name, the current setting's value,
+    |  and the system environment variable you can use to change it.
+
+
+  h1.h3.mb-3.font-weight-normal SMTP
+
+  dl.row
+    dt.col.sm-4 Host
+    dd.col-sm-4= smtp.host || '(empty)'
+    dd.col-sm-4
+      i SMTP_HOST
+  dl.row
+    dt.col.sm-4 Port
+    dd.col-sm-4= smtp.port || '(empty)'
+    dd.col-sm-4
+      i SMTP_PORT
+  dl.row
+    dt.col.sm-4 Secure
+    dd.col-sm-4= smtp.secure
+    dd.col-sm-4
+      i SMTP_SECURE
+  dl.row
+    dt.col.sm-4 From
+    dd.col-sm-4= smtp.from || '(empty)'
+    dd.col-sm-4
+      i SMTP_FROM
+  dl.row
+    dt.col.sm-4 Username
+    dd.col-sm-4= smtp.username || '(empty)'
+    dd.col-sm-4
+      i SMTP_USERNAME
+  dl.row
+    dt.col.sm-4 Authentication Mechanism
+    dd.col-sm-4= smtp.authMechanism || '(empty)'
+    dd.col-sm-4
+      i SMTP_AUTH_MECHANISM
+
+  form(method='post', action='/system/sendTestEmail')
+    div.row
+      div.col-md-3
+        button.btn.btn-md.btn-block.btn-secondary(type='submit') Send Test Email
+  if errorSendingTestEmail
+    br
+    div.alert.alert-danger #{errorSendingTestEmail}
+  else if testEmailSentSuccessfully
+    br
+    div.alert.alert-dark Test email sent successfully
+
+  h1.h3.mb-3.font-weight-normal Check-in
+
+  dl.row
+    dt.col.sm-4 Check-in notifications job cron schedule
+    dd.col-sm-4
+      a.text-muted(href='https://crontab.guru/#' + checkin.checkinNotificationsJobCron)= checkin.checkinNotificationsJobCron
+    dd.col-sm-4
+      i CHECKIN_NOTIFICATIONS_JOB_CRON
+  dl.row
+    dt.col.sm-4 Messages delivery job cron schedule
+    dd.col-sm-4
+      a.text-muted(href='https://crontab.guru/#' + checkin.messagesJobCron)= checkin.messagesJobCron
+    dd.col-sm-4
+      i MESSAGES_JOB_CRON
+  dl.row
+    dt.col.sm-4 Server URL
+    dd.col-sm-4= checkin.serverUrl
+    dd.col-sm-4
+      i SERVER_URL
+
+  h1.h3.mb-3.font-weight-normal SQLite
+
+  dl.row
+    dt.col.sm-4 Path
+    dd.col-sm-4= sqlite.path
+    dd.col-sm-4
+      i SQLITE_DB_PATH
+

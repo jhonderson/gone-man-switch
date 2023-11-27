@@ -1,0 +1,23 @@
+extends layout
+
+block content
+  h1.h2 Decrypt Message
+  hr
+  if encryptionPayload    
+    form(method='post', action='/messages/decrypt')
+      div.form-group
+        input.form-control(name='encryptionPayload', id='encryptionPayload', hidden, value=encryptionPayload)
+      div.form-group
+        label(for='encryptionPasswor') Encryption Password
+        input.form-control(name='encryptionPassword', id='encryptionPassword', placeholder='Enter encryption password', type='password', required)
+      hr
+      div.row
+        div.col-md-3
+          button.btn.btn-secondary.btn-block(type='submit') Decrypt Message
+
+  else if messageBody
+    dl.row
+      dd.col-sm-12
+        pre= messageBody
+
+  include mixins/_errors

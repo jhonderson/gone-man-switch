@@ -1,0 +1,105 @@
+extends layout
+
+block content
+  h1.h2 Edit Message
+
+  form(method='post', enctype="multipart/form-data")
+    hr
+    h1.h3.mb-3.font-weight-normal Content
+
+    div.form-group
+      label(for='recipients') Recipients
+      input.form-control(name='recipients', id='recipients', placeholder='email1@gmail.com, email2@yahoo.com', required, autofocus, value=message.recipients)
+
+    div.form-group
+      label(for='subject') Subject
+      input.form-control(name='subject', id='subject', placeholder='Email Subject', required, value=message.subject)
+
+    div.form-group
+      label(for='body') Body
+      textarea.form-control(name='body', id='body', placeholder='Update message body', rows='3', required=(message.encryption != "encrypted_custom_encryption_password"))= message.body
+
+    div.form-group
+      if message.encryption == 'encrypted_custom_encryption_password'
+        a.text-muted(href='/messages/decrypt/' + message.encryptionPayload, target='_blank', id='decryptMessageBodyLink')
+          | Decrypt Current Message Body
+          | #{' '}
+          i.fa.fa-external-link(arial-hidden)
+
+    div.form-group
+      a.text-muted.collapsed(data-toggle='collapse', href='#advanceEncryptionOptions')
+        | Show Advanced Encryption Options
+        | #{' '}
+        i.fa(arial-hidden)
+
+    div.collapse(id='advanceEncryptionOptions')
+      div.form-group
+        div
+          label Message Body Encryption
+          | #{' '}
+          a.text-muted.collapsed(data-toggle='collapse', href='#encryptionInformation')
+            | (Tell me more about these options
+            | #{' '}
+            i.fa(arial-hidden)
+            | )
+        div.form-check
+          input.form-check-input(name='messageBodyEncryption', id='unencrypted', type='radio', value="unencrypted" checked=(message.encryption == "unencrypted"))
+          label.form-check-label(for='unencrypted') Unencrypted
+        div.form-check
+          input.form-check-input(name='messageBodyEncryption', id='encryptedSystemEncryptionPassword', type='radio', value="encrypted_system_encryption_password", checked=(message.encryption == "encrypted_system_encryption_password"))
+          label.form-check-label(for='encryptedSystemEncryptionPassword') Encrypt using system encryption password
+        div.form-check
+          input.form-check-input(name='messageBodyEncryption', id='encryptedCustomEncryptionPassword', type='radio', value="encrypted_custom_encryption_password", checked=(message.encryption == "encrypted_custom_encryption_password"))
+          label.form-check-label(for='encryptedCustomEncryptionPassword') Encrypt using custom encryption password
+        div.collapse(id='encryptionInformation')
+          include mixins/_encryption_options_info
+
+    div.form-group(id='customEncryptionPasswordGroup', hidden=(message.encryption != "encrypted_custom_encryption_password"))
+      label(for='customEncryptionPassword') Custom Encryption Password
+      input.form-control(name='customEncryptionPassword', id='customEncryptionPassword', placeholder=(message.encryption == 'encrypted_custom_encryption_password' ? 'Only when updating message body' : 'Custom encryption password'), type='password')
+
+    div.form-group(id='customEncryptionPasswordHintGroup', hidden=(message.encryption != "encrypted_custom_encryption_password"))
+      label(for='customEncryptionPasswordHint') Custom Encryption Password Hint
+      input.form-control(name='customEncryptionPasswordHint', id='customEncryptionPasswordHint', placeholder='Hello Bob, the encryption password is the middle name of your oldest sibling', value=message.customEncryptionPasswordHint)
+
+    div.form-group
+      label Attachment (max 20MB): 
+      | !{' '}
+      a.text-muted(href='/messages/' + message.id + '/attachment/download')= message.attachmentName
+      input.form-control-file(name='attachment', id='attachment', type='file')
+
+    hr
+    h1.h3.mb-3.font-weight-normal Check-in Configuration
+
+    div.form-group
+      label(for='checkinFrequencyTime') Send me a check-in notification every...
+      div.form-row
+        div.col-md-2
+          input.form-control(name='checkinFrequencyTime', id='checkinFrequencyTime', required, type="number", min="1", value=message.checkinFrequencyTime)
+        div.col-md-2
+          select.form-control(name='checkinFrequencyTimeUnit', id='checkinFrequencyTimeUnit', required)
+            option(selected=(message.checkinFrequencyTimeUnit == "Days")) Days
+            option(selected=(message.checkinFrequencyTimeUnit == "Months")) Months
+            option(selected=(message.checkinFrequencyTimeUnit == "Years")) Years
+
+    div.form-group
+      label(for='checkinWaitingTime') Deliver this message if I don't respond to my check-in notification after...
+      div.form-row
+        div.col-md-2
+          input.form-control(name='checkinWaitingTime', id='checkinWaitingTime', required, type="number", min="1", value=message.checkinWaitingTime)
+        div.col-md-2
+          select.form-control(name='checkinWaitingTimeUnit', id='checkinWaitingTimeUnit', required)
+            option(selected=(message.checkinWaitingTimeUnit == "Days")) Days
+            option(selected=(message.checkinWaitingTimeUnit == "Months")) Months
+            option(selected=(message.checkinWaitingTimeUnit == "Years")) Years
+
+    hr
+
+    div.row
+      div.col-md-3
+        button.btn.btn-secondary.btn-block(type='submit') Save
+
+    include mixins/_errors
+    include mixins/_message_errors
+
+  script(src='/javascripts/messagesEdit.js')

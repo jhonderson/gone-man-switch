@@ -1,0 +1,27 @@
+extends layout
+
+block content
+  h1.h2 Delete User
+
+  hr
+
+  dl.row
+    dt.col.sm-2 Id
+    dd.col-sm-10= user.id
+  dl.row
+    dt.col.sm-2 Username
+    dd.col-sm-10= user.username
+  dl.row
+    dt.col.sm-2 Email
+    dd.col-sm-10= user.email
+  dl.row
+    dt.col.sm-2 Role
+    dd.col-sm-10= user.role
+
+  hr
+
+  form(action='/users/' + user.id + '/delete?confirm=true')
+    input(type='hidden', name='confirm', value='true')
+    div.row
+      div.col-md-3
+        button.btn.btn-md.btn-block.btn-secondary(type='submit') Delete

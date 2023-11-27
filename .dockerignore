@@ -1,0 +1,8 @@
+node_modules
+npm-debug.log
+README.md
+.env
+.gitignore
+.git/
+.github/
+screenshots

@@ -1,0 +1,14 @@
+.container
+  header.site-header.py-3
+    .row.flex-nowrap.justify-content-between.align-items-center 
+      .col-12.text-center
+        a.site-header-logo.text-dark(href='/') Gone Man's Switch
+  if loggedin
+    .nav-scroller.py-1.mb-2.site-menu
+      nav.nav.d-flex.justify-content-between
+        a.p-2.text-muted(href='/') Home
+        a.p-2.text-muted(href='/account') Account
+        if role == 'ADMIN'
+          a.p-2.text-muted(href='/users') Users
+          a.p-2.text-muted(href='/system') System
+        a.p-2.text-muted(href='/account/logout') Logout (#{username})

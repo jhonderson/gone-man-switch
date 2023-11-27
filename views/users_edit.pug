@@ -1,0 +1,31 @@
+extends layout
+
+block content
+  h1.h2 Edit User
+  hr
+  form(method='post')
+    div.form-group
+      label(for='userId') Id
+      input.form-control(name='userId', id='userId', readonly, value=user.id)
+
+    div.form-group
+      label(for='username') Username
+      input.form-control(name='username', id='username', required, autofocus, value=user.username)
+
+    div.form-group
+      label(for='email') Email
+      input.form-control(name='email', id='email', placeholder='email1@gmail.com, email2@yahoo.com', value=user.email)
+
+    div.form-group
+      label(for='role') Role
+      select.form-control(name='role', id='role', required)
+          option(selected=(user.role == "USER")) USER
+          option(selected=(user.role == "ADMIN")) ADMIN
+
+    hr
+
+    div.row
+      div.col-md-3
+        button.btn.btn-secondary.btn-block(type='submit') Update
+
+    include mixins/_errors

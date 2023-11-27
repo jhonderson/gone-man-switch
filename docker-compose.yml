@@ -1,0 +1,23 @@
+version: '3.8'
+services:
+  gone-man-switch:
+    container_name: gonemanswitch
+    volumes:
+    # The path to the left is the path where you want to store the SQLite database file
+      - './:/app/data'
+    ports:
+      - '3000:3000'
+    # environment:
+    #  - 'SERVER_URL=https://yourcustomdomain'
+    #  - 'COOKIE_SESSION_SECRET=any-secret-random-string-will-do'
+    #  - 'MESSAGE_ENCRYPTION_PASSWORD=any-secret-string-will-do'
+    # This example uses Microsoft SMTP server configs, you can use any SMTP service
+    #  - 'SMTP_HOST=smtp-mail.outlook.com'
+    #  - 'SMTP_PORT=587'
+    #  - 'SMTP_SECURE=false'
+    #  - 'SMTP_FROM=youremail@hotmail.com'
+    #  - 'SMTP_USERNAME=youremail@hotmail.com'
+    #  - 'SMTP_PASSWORD=your-app-password'
+    #  - 'SMTP_AUTH_MECHANISM=Login'
+    restart: on-failure
+    image: jhonderson/gone-man-switch:latest

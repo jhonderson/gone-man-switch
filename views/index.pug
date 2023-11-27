@@ -1,0 +1,34 @@
+extends layout
+
+block content
+  h1.h2 Messages
+  p Welcome to Gone Man's Switch! This is a simple web application that allows you to create messages that will be delivered by email in the event you are absent (gone) for a certain period.
+  p Here you can manage your messages.
+
+  div.row
+    div.col-md-3
+      a.btn.btn-md.btn-block.btn-secondary(role='button', href='/messages/new') New Message
+
+  br
+  if messages.length
+    div.justify-content-center.text-center
+      div.table-responsive
+        table.table.table-sm
+          thread
+            tr
+              th.d-none.d-md-table-cell Recipients
+              th Subject
+              th Actions
+          tbody
+            each message in messages
+              tr
+                td.d-none.d-md-table-cell #{message.recipients}
+                td #{message.subject}
+                td
+                  a.text-muted(href='/messages/' + message.id) View
+                  | !{' | '}
+                  a.text-muted(href='/messages/' + message.id + '/edit') Edit
+                  | !{' | '}
+                  a.text-muted(href='/messages/' + message.id + '/delete') Delete
+  else
+    div.alert.alert-secondary You haven't created any messages yet.

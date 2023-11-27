@@ -1,0 +1,19 @@
+extends layout
+
+block content
+  form.login-form.text-center.form-vertical(method='post')
+    fieldset
+
+      h1.h2.mb-3.font-weight-normal Login
+      div.form-group
+        label.sr-only(for='username') Username
+        input.form-control(name='username', id='username', placeholder='Username', required, autofocus)
+
+      div.form-group
+        label.sr-only(for='password') Password
+        input.form-control(name='password', id='password', placeholder='Password', type='password', required)
+
+      div.form-actions
+        button.btn.btn-md.btn-block.btn-secondary(type='submit') Login
+
+      include mixins/_errors

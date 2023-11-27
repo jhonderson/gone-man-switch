@@ -1,0 +1,118 @@
+#!/usr/bin/env node
+
+/**
+ * Module dependencies.
+ */
+
+if (process.env.NODE_ENV !== 'production') {
+  require('dotenv').config();
+}
+
+var app = require('../app');
+var debug = require('debug')('gone-man-switch:server');
+var http = require('http');
+var https = require('https');
+const fs = require("fs");
+const logger = require('../logger');
+
+/**
+ * Get port from environment and store in Express.
+ */
+
+var port = normalizePort(process.env.PORT || '3000');
+app.set('port', port);
+
+/**
+ * Create HTTP/HTTPs server.
+ */
+const sslKey = process.env.SSL_KEY || undefined;
+const sslCert = process.env.SSL_CERT || undefined;
+const sslKeyPassphrase = process.env.SSL_KEY_PASSPHRASE || undefined;
+let server;
+if (sslKey && sslCert) {
+  server = https.createServer({
+      key: fs.readFileSync(sslKey),
+      cert: fs.readFileSync(sslCert),
+      passphrase: sslKeyPassphrase,
+  }, app);
+} else {
+  server = http.createServer(app);
+}
+
+/**
+ * Listen on provided port, on all network interfaces.
+ */
+(async () => {
+  try {
+    await require('../db/sqlite').initializeDatabase();
+  } catch (err) {
+    logger.error(`Error initializing database: ${err.message}, aborting...`, err);
+    return;
+  }
+
+  await require("../jobs/jobs").initBackgroundJobs();
+
+  server.listen(port);
+  server.on('error', onError);
+  server.on('listening', onListening);
+})();
+
+/**
+ * Normalize a port into a number, string, or false.
+ */
+
+function normalizePort(val) {
+  var port = parseInt(val, 10);
+
+  if (isNaN(port)) {
+    // named pipe
+    return val;
+  }
+
+  if (port >= 0) {
+    // port number
+    return port;
+  }
+
+  return false;
+}
+
+/**
+ * Event listener for HTTP server "error" event.
+ */
+
+function onError(error) {
+  if (error.syscall !== 'listen') {
+    throw error;
+  }
+
+  var bind = typeof port === 'string'
+    ? 'Pipe ' + port
+    : 'Port ' + port;
+
+  // handle specific listen errors with friendly messages
+  switch (error.code) {
+    case 'EACCES':
+      logger.error(bind + ' requires elevated privileges');
+      process.exit(1);
+      break;
+    case 'EADDRINUSE':
+      logger.error(bind + ' is already in use');
+      process.exit(1);
+      break;
+    default:
+      throw error;
+  }
+}
+
+/**
+ * Event listener for HTTP server "listening" event.
+ */
+
+function onListening() {
+  var addr = server.address();
+  var bind = typeof addr === 'string'
+    ? 'pipe ' + addr
+    : 'port ' + addr.port;
+  debug('Listening on ' + bind);
+}

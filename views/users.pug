@@ -1,0 +1,30 @@
+extends layout
+
+block content
+  h1.h2 Users
+  br
+  div.row
+    div.col-md-3
+      a.btn.btn-md.btn-block.btn-secondary(role='button', href='/users/new') New User
+
+  br
+  if users.length
+    div.justify-content-center.text-center
+      div.table-responsive
+        table.table.table-sm
+          thread
+            tr
+              th Username
+              th Email
+              th Role
+              th Actions
+          tbody
+            each user in users
+              tr
+                td #{user.username}
+                td #{user.email}
+                td #{user.role}
+                td
+                  a.text-muted(href='/users/' + user.id + '/edit') Edit
+                  | !{' | '}
+                  a.text-muted(href='/users/' + user.id + '/delete') Delete
