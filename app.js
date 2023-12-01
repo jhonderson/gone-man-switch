@@ -7,6 +7,7 @@ const logger = require('morgan');
 const systemSettings = require('./services/system').getSystemSettings();
 
 const authMiddleware = require('./middlewares/auth');
+const checkinMiddleware = require('./middlewares/checkin');
 const indexRouter = require('./routes/index');
 const messagesRouter = require('./routes/messages');
 const accountRouter = require('./routes/account');
@@ -37,6 +38,7 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use(authMiddleware.addUserInformationToResponseLocals);
+app.use(checkinMiddleware.updateUserLastCheckin);
 
 app.use('/', indexRouter);
 app.use('/messages', messagesRouter);

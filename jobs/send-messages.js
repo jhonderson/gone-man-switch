@@ -1,8 +1,9 @@
 const { isSMTPConfigurationPresent, sendEmail } = require("../services/emails");
 const util = require('util');
 const logger = require('../logger');
-const messagesService = require("../services/messages");
 
+const messagesService = require("../services/messages");
+const checkinService = require("../services/checkin");
 const systemSettings = require('../services/system').getSystemSettings();
 
 const sendMessages = async () => {
@@ -15,6 +16,8 @@ const sendMessages = async () => {
   for (const message of messagesReadyToBeSent) {
     await sendMessage(message);
   }
+  // If a user has no more messages, delete its notifications
+  await checkinService.deleteOrphanCheckinNotifications();
   logger.debug('[send-messages] done');
 }
 

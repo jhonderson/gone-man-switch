@@ -103,7 +103,7 @@ Additional environment variables you can configure:
 - `CHECKIN_NOTIFICATIONS_JOB_CRON`: [Cron schedule expression](https://www.npmjs.com/package/node-schedule#cron-style-scheduling) for the job that sends check-in notifications. It runs daily at 8:00 am by default (`0 8 * * *`)
 - `MESSAGES_JOB_CRON`: [Cron schedule expression](https://www.npmjs.com/package/node-schedule#cron-style-scheduling) for the job that delivers messages. It runs daily at 8:00 am by default (`0 8 * * *`)
 
-Unless you plan on respond to your check-in notifications from within your local network, we recommend you to exposing this web application to the public using a reverse proxy and your custom domain provider.
+Unless you plan to respond to your registration notifications from your local network, we recommend exposing this web application to the public using a reverse proxy and your custom domain provider.
 
 ## Local Development
 
@@ -135,10 +135,10 @@ Let's say you create a message with the following information:
 - Recipients: `bob@hotmail.com, lily@gmail.com`
 - Subject: `Important message for you`
 - Body: `Hello, here is some important information I want you to have...`
-- Send me a check-in notification every: `6 Months`
+- Send me a check-in notification if I am absent for more than: `6 Months`
 - Deliver this message if I don't respond to my check-in notification after: `10 Days`
 
-6 months after you create this message you will receive a check-in notification email like this:
+After 6 months of absence (you don't login to Gone Man's Switch) you will receive a check-in notification email like this:
 ```
 From:
   your-smtp-from-email@domain.com

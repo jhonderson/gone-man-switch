@@ -29,6 +29,7 @@ exports.logout = asyncHandler(async (req, res, next) => {
   req.session.username = null;
   req.session.role = null;
   req.session.userId = null;
+  req.session.lastCheckinAt = null;
   req.session = null;
   res.redirect('/account/login');
 });

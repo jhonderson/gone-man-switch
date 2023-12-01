@@ -1,9 +1,8 @@
 const { isSMTPConfigurationPresent, sendEmail } = require("../services/emails");
 const util = require('util');
 const logger = require('../logger');
-const messagesService = require("../services/messages");
-const checkinService = require("../services/checkin");
 
+const checkinService = require("../services/checkin");
 const systemSettings = require('../services/system').getSystemSettings();
 
 const sendCheckinNotifications = async () => {
@@ -12,27 +11,22 @@ const sendCheckinNotifications = async () => {
     logger.error("SMTP configuration is not complete, aborting job since the system won't be able to send check-in notifications");
     return;
   }
-  const messagesNeedingCheckin = await messagesService.getMessagesNeedingCheckedin();
-  for (const message of messagesNeedingCheckin) {
-    await sendMessageCheckinNotification(message);
+  const usersNeedingCheckin = await checkinService.getUsersNeedingCheckin();
+  for (const user of usersNeedingCheckin) {
+    await sendMessageCheckinNotification(user);
   }
   logger.debug('[checkin-notifications] done');
 }
 
-const sendMessageCheckinNotification = async (message) => {
-  if (await checkinService.isThereAnActiveCheckinNotificationForMessage(message.id)) {
-    await messagesService.updateMessageCheckinStatus(message.id, 'checkin_notification_sent');
-    logger.debug(`Notification already sent for message with id ${message.id}`);
+const sendMessageCheckinNotification = async ({ id, email }) => {
+  if (!email) {
+    logger.error(`Notification for user with id ${id} cannot be sent because the associated user has no email configured`);
     return;
   }
-  if (!message.userEmail) {
-    logger.error(`Notification for message with id ${message.id} cannot be sent because the associated user has no email configured`);
-    return;
-  }
-  const checkinNotificationId = await checkinService.createCheckinNotificationForMessage(message.id);
+  const checkinNotificationId = await checkinService.createCheckinNotificationForUser(id);
   try {
     await sendEmail({
-      recipients: message.userEmail,
+      recipients: email,
       subject:  systemSettings.checkin.email.subject,
       body: util.format(systemSettings.checkin.email.bodyFormat, buildCheckinUrl(checkinNotificationId))
     });
@@ -41,8 +35,7 @@ const sendMessageCheckinNotification = async (message) => {
     await checkinService.deleteCheckinNotification(checkinNotificationId);
     return;
   }
-  await messagesService.updateMessageCheckinStatus(message.id, 'checkin_notification_sent');
-  logger.info(`Notification sent succesfully for message with id ${message.id}`);
+  logger.info(`Notification sent succesfully for user with id ${id}`);
 }
 
 function buildCheckinUrl(checkinNotificationId) {

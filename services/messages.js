@@ -4,11 +4,6 @@ const emailsService = require('../services/emails');
 const encryptionService = require('../services/encryption');
 const systemSettings = require('../services/system').getSystemSettings();
 
-const MessageCheckinStatus = {
-  checked_in: 'checked_in',
-  checkin_notification_sent: 'checkin_notification_sent'
-};
-
 const MessageBodyEncryption = {
   unencrypted: 'unencrypted',
   encrypted_system_encryption_password: 'encrypted_system_encryption_password',
@@ -27,9 +22,9 @@ const createMessage = async ({userId, recipients, subject, body, encryption, cus
     throw new Error('System encryption password cannot be used because there is no message encryption password configured at the system level');
   }
   await getDb().run(`INSERT INTO messages(id, user_id, recipients, subject, body, encryption, custom_encryption_pass_hint,
-                        attachment_name, attachment_content, checkin_status, checkin_frequency_days, checkin_waiting_days, last_checkin_at)
+                        attachment_name, attachment_content, checkin_frequency_days, checkin_waiting_days)
                      VALUES (:id, :user_id, :recipients, :subject, :body, :encryption, :custom_encryption_pass_hint, :attachment_name,
-                        :attachment_content, :checkin_status, :checkin_frequency_days, :checkin_waiting_days, :last_checkin_at)`, {
+                        :attachment_content, :checkin_frequency_days, :checkin_waiting_days)`, {
     ':id': require('crypto').randomUUID(),
     ':user_id': userId,
     ':recipients': recipients,
@@ -39,10 +34,8 @@ const createMessage = async ({userId, recipients, subject, body, encryption, cus
     ':custom_encryption_pass_hint': encryption == MessageBodyEncryption.encrypted_custom_encryption_password ? customEncryptionPasswordHint : undefined,
     ':attachment_name': attachmentName,
     ':attachment_content': attachmentContent,
-    ':checkin_status': MessageCheckinStatus.checked_in,
     ':checkin_frequency_days': checkinFrequencyDays,
-    ':checkin_waiting_days': checkinWaitingDays,
-    ':last_checkin_at': new Date().toISOString()
+    ':checkin_waiting_days': checkinWaitingDays
     });
 }
 
@@ -100,36 +93,27 @@ const updateMessage = async ({id, recipients, subject, body, encryption, customE
     });
 }
 
-const getMessagesNeedingCheckedin = async () => {
-  return getDb().all(`SELECT messages.id, messages.user_id as userId, users.email AS userEmail
-    FROM messages INNER JOIN users
-      ON messages.user_id = users.id
-    WHERE checkin_status = '${MessageCheckinStatus.checked_in}'
-      AND (julianday('now') - julianday(last_checkin_at)) > checkin_frequency_days;`);
-}
-
+/**
+ * Returns an array of messages ready to be delivered. A message is ready to be delivered
+ * when 1) the number of days of absence of its associated user are greater than the
+ * message check-in frequency days and 2) there is at least one pending check-in
+ * notification with age days greater than the message check-in waiting days
+ */
 const getMessagesReadyToBeDelivered = async () => {
-  const messages = await getDb().all(`SELECT messages.id, messages.user_id AS userId, messages.recipients,
+  const messages = await getDb().all(`
+    SELECT DISTINCT messages.id, messages.user_id AS userId, messages.recipients,
       messages.subject, messages.body, messages.encryption,
       messages.custom_encryption_pass_hint AS customEncryptionPasswordHint,
-      messages.attachment_name AS attachmentName, messages.attachment_content AS attachmentContent,
-      checkin_notifications.id AS checkinNotificationId
-    FROM checkin_notifications INNER JOIN messages
-      ON checkin_notifications.message_id = messages.id
-    WHERE messages.checkin_status = '${MessageCheckinStatus.checkin_notification_sent}'
-      AND (julianday('now') - julianday(checkin_notifications.sent_at)) > messages.checkin_waiting_days;`);
+      messages.attachment_name AS attachmentName, messages.attachment_content AS attachmentContent
+    FROM checkin_notifications
+      INNER JOIN users
+        ON checkin_notifications.user_id = users.id
+      INNER JOIN messages
+        ON users.id = messages.user_id
+    WHERE
+      (julianday('now') - julianday(users.last_checkin_at)) > messages.checkin_frequency_days
+      AND (julianday('now') - julianday(checkin_notifications.sent_at)) > messages.checkin_waiting_days`);
   return messages.map(message => decryptMessage(message));
-}
-
-const updateMessageCheckinStatus = async (id, newStatus) => {
-  if (newStatus == MessageCheckinStatus.checked_in) {
-    await getDb().run("UPDATE messages SET checkin_status = ?, last_checkin_at = ? WHERE id = ?",
-      MessageCheckinStatus.checked_in, new Date().toISOString(), id);
-  } else if (Object.keys(MessageCheckinStatus).includes(newStatus)) {
-    await getDb().run("UPDATE messages SET checkin_status = ? WHERE id = ?", newStatus, id);
-  } else {
-    throw new Error(`Invalid message checkin status provided: ${newStatus}, see valid values: ${Object.keys(MessageCheckinStatus)}`);
-  }
 }
 
 const getMessagesByUserId = async (userId) => {
@@ -189,15 +173,12 @@ const decryptMessageBodyFromEncryptionPayload = (encryptionPayload, encryptionPa
 }
 
 module.exports = {
-  MessageCheckinStatus,
   MessageBodyEncryption,
   createMessage,
   getMessage,
   deleteMessage,
   updateMessage,
-  getMessagesNeedingCheckedin,
   getMessagesReadyToBeDelivered,
-  updateMessageCheckinStatus,
   getMessagesByUserId,
   decryptMessageBodyFromEncryptionPayload,
 }

@@ -12,19 +12,20 @@ const createUser = async ({username, email, password, passwordConfirmation, role
     throw new Error("Wanted username is not available");
   }
   const passwordHash = bcrypt.hashSync(password, 10);
-  await getDb().run(`INSERT INTO users(id, username, email, password_hash, role, created_at)
-                      VALUES (:id, :username, :email, :password_hash, :role, :created_at)`, {
+  await getDb().run(`INSERT INTO users(id, username, email, password_hash, role, created_at, last_checkin_at)
+                      VALUES (:id, :username, :email, :password_hash, :role, :created_at, :last_checkin_at)`, {
     ':id': require('crypto').randomUUID(),
     ':username': username,
     ':email': email,
     ':password_hash': passwordHash,
     ':role': role,
-    ':created_at': new Date().toISOString()
+    ':created_at': new Date().toISOString(),
+    ':last_checkin_at': new Date().toISOString()
   });
 }
 
 const getUser = async (id) => {
-  return getDb().get("SELECT id, username, email, role, created_at AS createdAt FROM users WHERE id = ?", id);
+  return getDb().get("SELECT id, username, email, role, created_at AS createdAte, last_checkin_at AS lastCheckinAt FROM users WHERE id = ?", id);
 }
 
 const updateUser = async ({id, username, email, currentPassword, newPassword, passwordConfirmation, role}) => {
@@ -60,6 +61,10 @@ const updateUser = async ({id, username, email, currentPassword, newPassword, pa
     });
 }
 
+const updateUserLastCheckin = async (id) => {
+  await getDb().run("UPDATE users SET last_checkin_at = ? WHERE id = ?", new Date().toISOString(), id);
+}
+
 const deleteUser = async (id) => {
   await getDb().run('DELETE FROM users WHERE id = ?', id);
 }
@@ -69,7 +74,7 @@ const getAllUsers = async () => {
 }
 
 const getUserByUsernameAndPassword = async (username, password) => {
-  const user = await getDb().get("SELECT id, username, email, password_hash as passwordHash, role, created_at AS createdAt FROM users WHERE username = ?", username);
+  const user = await getDb().get("SELECT id, username, email, password_hash as passwordHash, role, created_at AS createdAt, last_checkin_at AS lastCheckinAt FROM users WHERE username = ?", username);
   if (user && bcrypt.compareSync(password, user.passwordHash)) {
     const {passwordHash: _, ...userWithoutPassword } = user;
     return userWithoutPassword;
@@ -78,7 +83,7 @@ const getUserByUsernameAndPassword = async (username, password) => {
 }
 
 const getUserByUsername = async (username) => {
-  return getDb().get("SELECT id, username, email, role, created_at AS createdAt FROM users WHERE username = ?", username);
+  return getDb().get("SELECT id, username, email, role, created_at AS createdAt, last_checkin_at AS lastCheckinAt FROM users WHERE username = ?", username);
 }
 
 const areThereAnyUsers = async () => {
@@ -101,6 +106,7 @@ module.exports = {
   createUser,
   getUser,
   updateUser,
+  updateUserLastCheckin,
   deleteUser,
   getAllUsers,
   getUserByUsernameAndPassword,
