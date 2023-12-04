@@ -1,27 +1,21 @@
 extends layout
 
+include mixins/_errors
+
 block content
   h1.h2 Edit Message
 
   form(method='post', enctype="multipart/form-data")
     hr
-    h1.h3.mb-3.font-weight-normal Content
+    h1.h3.mb-3.font-weight-normal Message
 
     div.form-group
-      label(for='recipients') Recipients
-      input.form-control(name='recipients', id='recipients', placeholder='email1@gmail.com, email2@yahoo.com', required, autofocus, value=message.recipients)
-
-    div.form-group
-      label(for='subject') Subject
-      input.form-control(name='subject', id='subject', placeholder='Email Subject', required, value=message.subject)
-
-    div.form-group
-      label(for='body') Body
-      textarea.form-control(name='body', id='body', placeholder='Update message body', rows='3', required=(message.encryption != "encrypted_custom_encryption_password"))= message.body
+      label(for='content') Content
+      textarea.form-control(name='content', id='content', placeholder='Update message content', rows='3', required=(message.encryption != "encrypted_custom_encryption_password"))= message.content
 
     div.form-group
       if message.encryption == 'encrypted_custom_encryption_password'
-        a.text-muted(href='/messages/decrypt/' + message.encryptionPayload, target='_blank', id='decryptMessageBodyLink')
+        a.text-muted(href='/messages/decrypt/' + message.encryptionPayload, target='_blank', id='decryptMessageContentLink')
           | Decrypt Current Message Body
           | #{' '}
           i.fa.fa-external-link(arial-hidden)
@@ -43,13 +37,13 @@ block content
             i.fa(arial-hidden)
             | )
         div.form-check
-          input.form-check-input(name='messageBodyEncryption', id='unencrypted', type='radio', value="unencrypted" checked=(message.encryption == "unencrypted"))
+          input.form-check-input(name='messageContentEncryption', id='unencrypted', type='radio', value="unencrypted" checked=(message.encryption == "unencrypted"))
           label.form-check-label(for='unencrypted') Unencrypted
         div.form-check
-          input.form-check-input(name='messageBodyEncryption', id='encryptedSystemEncryptionPassword', type='radio', value="encrypted_system_encryption_password", checked=(message.encryption == "encrypted_system_encryption_password"))
+          input.form-check-input(name='messageContentEncryption', id='encryptedSystemEncryptionPassword', type='radio', value="encrypted_system_encryption_password", checked=(message.encryption == "encrypted_system_encryption_password"))
           label.form-check-label(for='encryptedSystemEncryptionPassword') Encrypt using system encryption password
         div.form-check
-          input.form-check-input(name='messageBodyEncryption', id='encryptedCustomEncryptionPassword', type='radio', value="encrypted_custom_encryption_password", checked=(message.encryption == "encrypted_custom_encryption_password"))
+          input.form-check-input(name='messageContentEncryption', id='encryptedCustomEncryptionPassword', type='radio', value="encrypted_custom_encryption_password", checked=(message.encryption == "encrypted_custom_encryption_password"))
           label.form-check-label(for='encryptedCustomEncryptionPassword') Encrypt using custom encryption password
         div.collapse(id='encryptionInformation')
           include mixins/_encryption_options_info
@@ -62,11 +56,65 @@ block content
       label(for='customEncryptionPasswordHint') Custom Encryption Password Hint
       input.form-control(name='customEncryptionPasswordHint', id='customEncryptionPasswordHint', placeholder='Hello Bob, the encryption password is the middle name of your oldest sibling', value=message.customEncryptionPasswordHint)
 
-    div.form-group
-      label Attachment (max 20MB): 
-      | !{' '}
-      a.text-muted(href='/messages/' + message.id + '/attachment/download')= message.attachmentName
-      input.form-control-file(name='attachment', id='attachment', type='file')
+    hr
+    h1.h3.mb-3.font-weight-normal Destinations
+
+    a.text-muted(data-toggle='collapse', href='#destinationEmail', class=message.hasEmailDestination? '' : 'collapsed')
+      h1.h5.mb-3.font-weight-normal Email
+        | #{' '}
+        i.fa(arial-hidden)
+
+    div.collapse(id='destinationEmail', class=message.hasEmailDestination? 'show' : '')
+      div.form-group
+        label(for='emailRecipients') Recipients
+        input.form-control(name='emailRecipients', id='emailRecipients', placeholder='email1@gmail.com, email2@yahoo.com', value=message.emailRecipients)
+
+      div.form-group
+        label(for='emailSubject') Subject
+        input.form-control(name='emailSubject', id='emailSubject', placeholder='Email Subject', value=message.emailSubject)
+
+      div.form-group
+        label Attachment (max 20MB): 
+        | !{' '}
+        a.text-muted(href='/messages/' + message.id + '/attachment/download')= message.emailAttachmentName
+        input.form-control-file(name='emailAttachment', id='emailAttachment', type='file')
+
+    a.text-muted.collapsed(data-toggle='collapse', href='#destinationSMS', class=message.hasSMSDestination? '' : 'collapsed')
+      h1.h5.mb-3.font-weight-normal SMS
+        | #{' '}
+        i.fa(arial-hidden)
+
+    div.collapse(id='destinationSMS', class=message.hasSMSDestination? 'show' : '')
+      div.form-group
+        label(for='smsServiceProvider') Service Provider
+        select.form-control(name='smsServiceProvider', id='smsServiceProvider')
+          option(selected=(!message.hasSMSDestination || message.smsServiceProvider == 'twilio'), value="twilio") Twilio
+
+      div.form-group
+        label(for='smsPhoneNumbers') Phone Numbers
+        input.form-control(name='smsPhoneNumbers', id='smsPhoneNumbers', placeholder='+12846663222, +575867841896', value=message.smsPhoneNumbers)
+
+    a.text-muted.collapsed(data-toggle='collapse', href='#destinationTelegram', class=message.hasTelegramDestination? '' : 'collapsed')
+      h1.h5.mb-3.font-weight-normal Telegram
+        | #{' '}
+        i.fa(arial-hidden)
+
+    div.collapse(id='destinationTelegram', class=message.hasTelegramDestination? 'show' : '')
+      div.form-group
+        label(for='telegramParseMode') Message Format
+        select.form-control(name='telegramParseMode', id='telegramParseMode')
+            option(selected=(!message.hasTelegramDestination || !message.telegramParseMode)) Plain Text
+            option(selected=(message.hasTelegramDestination && message.telegramParseMode == 'HTML')) HTML
+            option(selected=(message.hasTelegramDestination && message.telegramParseMode == 'MarkdownV2')) MarkdownV2
+            option(selected=(message.hasTelegramDestination && message.telegramParseMode == 'Markdown')) Markdown
+      div.form-group
+        label(for='telegramChatIds') Chat Ids
+        input.form-control(name='telegramChatIds', id='telegramChatIds', placeholder='1155263894, 8416319852', value=message.telegramChatIds)
+        div.form-group
+          small.text-muted
+            | See how to get Telegram Chat Ids in our 
+            a.text-muted.collapsed(data-toggle='collapse', href='https://github.com/jhonderson/gone-man-switch/tree/v0.1.4#telegram')
+              strong Github Docs
 
     hr
     h1.h3.mb-3.font-weight-normal Check-in Configuration
@@ -99,7 +147,7 @@ block content
       div.col-md-3
         button.btn.btn-secondary.btn-block(type='submit') Save
 
-    include mixins/_errors
-    include mixins/_message_errors
+    +showErrors(errors)
+    +showErrors(message.errors)
 
   script(src='/javascripts/messagesEdit.js')

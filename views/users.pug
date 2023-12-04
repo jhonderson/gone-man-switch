@@ -15,14 +15,12 @@ block content
           thread
             tr
               th Username
-              th Email
               th Role
               th Actions
           tbody
             each user in users
               tr
                 td #{user.username}
-                td #{user.email}
                 td #{user.role}
                 td
                   a.text-muted(href='/users/' + user.id + '/edit') Edit

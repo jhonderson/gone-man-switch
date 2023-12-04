@@ -16,14 +16,27 @@ block content
         table.table.table-sm
           thread
             tr
-              th.d-none.d-md-table-cell Recipients
-              th Subject
+              th.d-none.d-md-table-cell Content
+              th Destinations
               th Actions
           tbody
             each message in messages
               tr
-                td.d-none.d-md-table-cell #{message.recipients}
-                td #{message.subject}
+                if message.content
+                  if message.content.length > 40
+                    td.d-none.d-md-table-cell #{message.content.substring(0, 40) + ' ...'}
+                  else
+                    td.d-none.d-md-table-cell #{message.content}
+                else
+                  td
+                    i Encrypted
+                td
+                  if message.destinations.email
+                    |  Email 
+                  if message.destinations.sms
+                    |  SMS
+                  if message.destinations.telegram
+                    |  Telegram
                 td
                   a.text-muted(href='/messages/' + message.id) View
                   | !{' | '}

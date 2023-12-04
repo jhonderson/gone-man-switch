@@ -1,9 +1,13 @@
 extends layout
 
+include mixins/_errors
+
 block content
   h1.h2 Account
   hr
   form(method='post')
+    h1.h3.mb-3.font-weight-normal(id='accountinformation') Information
+
     div.form-group
       label(for='id') Id
       input.form-control(name='id', id='id', readonly, value=user.id)
@@ -11,10 +15,6 @@ block content
     div.form-group
       label(for='username') Username
       input.form-control(name='username', id='username', placeholder='Unique username', required, autofocus, value=user.username)
-
-    div.form-group
-      label(for='email') Email
-      input.form-control(name='email', id='email', placeholder='email1@gmail.com, email2@yahoo.com', value=user.email)
 
     div.form-group
       label(for='role') Role
@@ -32,10 +32,192 @@ block content
       label(for='passwordConfirmation') Confirm Password
       input.form-control(name='passwordConfirmation', id='passwordConfirmation', placeholder='Only when changing your password', type='password')
 
-    hr
+    div.row
+      div.col-md-3
+        button.btn.btn-secondary.btn-block(type='submit') Update Information
+
+    +showErrors(errorsUpdatingAccount)
+
+  hr
+
+  form(method='post', action='/account/checkinDestinations')
+    h1.h3.mb-3.font-weight-normal(id='checkindestinations') Check-in Destinations
+    p Where should we send you check-in notifications?
+
+    a.text-muted(data-toggle='collapse', href='#destinationEmail', class=user.hasEmailDestination? '' : 'collapsed')
+      h1.h5.mb-3.font-weight-normal Email
+        | #{' '}
+        i.fa(arial-hidden)
+
+    div.collapse(id='destinationEmail', class=user.hasEmailDestination? 'show' : '')
+      div.form-group
+        label(for='emailRecipients') Recipients
+        input.form-control(name='emailRecipients', id='emailRecipients', placeholder='email1@gmail.com, email2@yahoo.com', value=user.emailRecipients)
+
+    a.text-muted.collapsed(data-toggle='collapse', href='#destinationSMS', class=user.hasSMSDestination? '' : 'collapsed')
+      h1.h5.mb-3.font-weight-normal SMS
+        | #{' '}
+        i.fa(arial-hidden)
+
+    div.collapse(id='destinationSMS', class=user.hasSMSDestination? 'show' : '')
+      div.form-group
+        label(for='smsServiceProvider') Service Provider
+        select.form-control(name='smsServiceProvider', id='smsServiceProvider')
+          option(selected=(!user.hasSMSDestination || user.smsServiceProvider == 'twilio'), value="twilio") Twilio
+
+      div.form-group
+        label(for='smsPhoneNumbers') Phone Numbers
+        input.form-control(name='smsPhoneNumbers', id='smsPhoneNumbers', placeholder='+12846663222, +575867841896', value=user.smsPhoneNumbers)
+
+    a.text-muted.collapsed(data-toggle='collapse', href='#destinationTelegram', class=user.hasTelegramDestination? '' : 'collapsed')
+      h1.h5.mb-3.font-weight-normal Telegram
+        | #{' '}
+        i.fa(arial-hidden)
+
+    div.collapse(id='destinationTelegram', class=user.hasTelegramDestination? 'show' : '')
+      div.form-group
+        label(for='telegramChatIds') Chat Ids
+        input.form-control(name='telegramChatIds', id='telegramChatIds', placeholder='1155263894, 8416319852', value=user.telegramChatIds)
+        div.form-group
+          small.text-muted
+            | See how to get Telegram Chat Ids in our 
+            a.text-muted.collapsed(data-toggle='collapse', href='https://github.com/jhonderson/gone-man-switch/tree/v0.1.4#telegram')
+              strong Github Docs
+
 
     div.row
-      div.col-md-2
-        button.btn.btn-secondary.btn-block(type='submit') Update
+      div.col-md-3
+        button.btn.btn-secondary.btn-block(type='submit') Update Destinations
 
-    include mixins/_errors
+    +showErrors(errorsUpdatingCheckinDestinations)
+
+  hr
+
+  form(method='post', action='/account/settings')
+    h1.h3.mb-3.font-weight-normal(id='accountlevelsettings') Account Level Settings
+
+    a.text-muted.collapsed(data-toggle='collapse', href='#smtpSettings')
+      h1.h5.mb-3.font-weight-normal SMTP
+        | #{' '}
+        i.fa(arial-hidden)
+
+    div.collapse(id='smtpSettings')
+      div.form-group.row
+        label.col-sm-3.col-form-label(for='smtpHost') Host
+        div.col-sm-9
+          input.form-control(name='smtpHost', id='smtpHost', placeholder='smtp-mail.outlook.com', value=user.smtpHost)
+      div.form-group.row
+        label.col-sm-3.col-form-label(for='smtpPort') Port
+        div.col-sm-9
+          input.form-control(name='smtpPort', id='smtpPort', placeholder='587', value=user.smtpPort, type="number", min="1")
+      div.form-group.row
+        label.col-sm-3.col-form-label(for='smtpSecure') Secure
+        div.col-auto
+          input.form-control(name='smtpSecure', id='smtpSecure', checked=(user.smtpSecure == true), type='checkbox')
+      div.form-group.row
+        label.col-sm-3.col-form-label(for='smtpFrom') From
+        div.col-sm-9
+          input.form-control(name='smtpFrom', id='smtpFrom', placeholder='youremail@hotmail.com', value=user.smtpFrom)
+      div.form-group.row
+        label.col-sm-3.col-form-label(for='smtpUsername') Username
+        div.col-sm-9
+          input.form-control(name='smtpUsername', id='smtpUsername', placeholder='youremail@hotmail.com', value=user.smtpUsername)
+      div.form-group.row
+        label.col-sm-3.col-form-label(for='smtpPassword') Password
+        div.col-sm-9
+          input.form-control(name='smtpPassword', id='smtpPassword', placeholder=user.hasSMTPPassword ? 'Update password' : 'Password', type='password')
+          if user.hasSMTPPassword
+            div.form-group
+              small.text-muted Password was already provided by you, there's no need to enter it again unless you want to change it
+      div.form-group.row
+        label.col-sm-3.col-form-label(for='smtpAuthMechanism') Authentication Mechanism
+        div.col-sm-9
+          input.form-control(name='smtpAuthMechanism', id='smtpAuthMechanism', placeholder='Login', value=user.smtpAuthMechanism)
+
+    a.text-muted.collapsed(data-toggle='collapse', href='#twilioSettings')
+      h1.h5.mb-3.font-weight-normal Twilio
+        | #{' '}
+        i.fa(arial-hidden)
+
+    div.collapse(id='twilioSettings')
+      div.form-group.row
+        label.col-sm-3.col-form-label(for='twilioAccountSid') Account SID
+        div.col-sm-9
+          input.form-control(name='twilioAccountSid', id='twilioAccountSid', placeholder='ACXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX', value=user.twilioAccountSid)
+      div.form-group.row
+        label.col-sm-3.col-form-label(for='twilioAuthToken') Auth Token
+        div.col-sm-9
+          input.form-control(name='twilioAuthToken', id='twilioAuthToken', placeholder=user.hasTwilioAuthToken ? 'Update auth token' : 'Auth token', type='password', value=user.twilioAuthToken)
+          if user.hasTwilioAuthToken
+            div.form-group
+              small.text-muted Twilio Auth Token was already provided by you, there's no need to enter it again unless you want to change it
+      div.form-group.row
+        label.col-sm-3.col-form-label(for='twilioFrom') From Number
+        div.col-sm-9
+          input.form-control(name='twilioFrom', id='twilioFrom', placeholder='+12586213549', value=user.twilioFrom)
+
+    a.text-muted.collapsed(data-toggle='collapse', href='#telegramSettings')
+      h1.h5.mb-3.font-weight-normal Telegram
+        | #{' '}
+        i.fa(arial-hidden)
+
+    div.collapse(id='telegramSettings')
+      div.form-group.row
+        label.col-sm-3.col-form-label(for='telegramBotToken') Bot Token
+        div.col-sm-9
+          input.form-control(name='telegramBotToken', id='telegramBotToken', placeholder=user.hasTelegramBotToken ? 'Update bot token' : 'Bot token', type='password', value=user.telegramBotToken)
+          if user.hasTelegramBotToken
+            div.form-group
+              small.text-muted Telegram Bot Token was already provided by you, there's no need to enter it again unless you want to change it
+          else
+            div.form-group
+              small.text-muted
+                | See how to get a Telegram Bot Token in our 
+                a.text-muted.collapsed(data-toggle='collapse', href='https://github.com/jhonderson/gone-man-switch/tree/v0.1.4#telegram')
+                  strong Github Docs
+
+    div.row
+      div.col-md-3
+        button.btn.btn-secondary.btn-block(type='submit') Update Settings
+
+    +showErrors(errorsUpdatingSettings)
+
+  hr
+
+  h1.h3.mb-3.font-weight-normal(id='testyoursettings') Test Your Settings
+  form(method='post', action='/account/sendTestEmail')
+    div.form-group.row
+      div.col-sm-2.my-1
+        label.col-form-label(for='testEmailRecipients') Recipients
+      div.col-sm-8.my-1
+        input.form-control(name='testEmailRecipients', id='testEmailRecipients', placeholder='email1@gmail.com, email2@yahoo.com')
+      div.col-sm-2.my-1
+        button.btn.btn-secondary(type='submit') Send Test Email
+  form(method='post', action='/account/sendTestSMSMessage')
+    div.form-group.row
+      div.col-sm-2.my-1
+        label.col-form-label(for='testSMSServiceProvider') Service Provider
+      div.col-sm-3.my-1
+        select.form-control(name='testSMSServiceProvider', id='testSMSServiceProvider')
+          option(selected=(!user.hasSMSDestination || user.smsServiceProvider == 'twilio'), value="twilio") Twilio
+      div.col-sm-2.my-1
+        label.col-form-label(for='testSMSPhoneNumbers') Phone Numbers
+      div.col-sm-3.my-1
+        input.form-control(name='testSMSPhoneNumbers', id='testSMSPhoneNumbers', placeholder='+12846663222, +575867841896')
+      div.col-sm-2.my-1
+        button.btn.btn-secondary(type='submit') Send Test SMS
+  form(method='post', action='/account/sendTestTelegramMessage')
+    div.form-group.row
+      div.col-sm-2.my-1
+        label.col-form-label(for='testTelegramChatIds') Chat Ids
+      div.col-sm-8.my-1
+        input.form-control(name='testTelegramChatIds', id='testTelegramChatIds', placeholder='1155263894, 8416319852')
+      div.col-sm-2.my-1
+        button.btn.btn-secondary(type='submit') Send Test Message
+  if errorSendingTestMessage
+    br
+    div.alert.alert-danger= errorSendingTestMessage
+  if testMessageResult
+    br
+    div.alert.alert-dark= testMessageResult
+

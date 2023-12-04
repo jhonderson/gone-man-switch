@@ -1,6 +1,6 @@
 {
   "name": "gone-man-switch",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "private": true,
   "scripts": {
     "start": "node ./bin/www"
@@ -21,6 +21,7 @@
     "pug": "3.0.2",
     "sqlite": "^5.1.1",
     "sqlite3": "^5.1.6",
+    "twilio": "^4.19.3",
     "winston": "^3.11.0"
   },
   "devDependencies": {

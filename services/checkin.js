@@ -8,7 +8,7 @@ const usersService = require('./users');
  */
 const getUsersNeedingCheckin = async () => {
   return getDb().all(`
-    SELECT DISTINCT users.id AS id, users.email AS email
+    SELECT DISTINCT users.id AS id
     FROM users
       INNER JOIN messages
         ON users.id = messages.user_id

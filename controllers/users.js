@@ -20,7 +20,6 @@ exports.createUser = asyncHandler(async (req, res, next) => {
   try {
     await usersService.createUser({
       username: req.body.username,
-      email: req.body.email,
       role: req.body.role,
       password: req.body.password,
       passwordConfirmation: req.body.passwordConfirmation,
@@ -54,7 +53,6 @@ exports.updateUser = asyncHandler(async (req, res, next) => {
     await usersService.updateUser({
       id: req.params.userId,
       username: req.body.username,
-      email: req.body.email,
       role: req.body.role
     });
     res.redirect('/users');
@@ -88,7 +86,6 @@ exports.deleteUser = asyncHandler(async (req, res, next) => {
 
 exports.createUserInputValidations = [
   body('username', "Username field is mandatory").notEmpty(),
-  body('email', "Email is not valid").if(body('email').notEmpty()).isEmail(),
   body('role', "Role field is mandatory").notEmpty(),
   body('role', "Role is not valid").isIn(['USER', 'ADMIN']),
   body('password', "Password field is mandatory").notEmpty(),
@@ -97,7 +94,6 @@ exports.createUserInputValidations = [
 
 exports.updateUserInputValidations = [
   body('username', "Username field is mandatory").notEmpty(),
-  body('email', "Email is not valid").if(body('email').notEmpty()).isEmail(),
   body('role', "Role field is mandatory").notEmpty(),
   body('role', "Role is not valid").isIn(['USER', 'ADMIN']),
 ];

@@ -19,6 +19,7 @@ async function initializeDatabase() {
 
 async function runMigrations() {
   await moveLastCheckinColumnToUserLevel();
+  await addSupportForMultipleDeliveryDestinations();
 }
 
 /**
@@ -87,6 +88,52 @@ async function moveLastCheckinColumnToUserLevel() {
   }
 }
 
+/**
+ * Changes the db to add support for multiple delivery channels.
+ */
+async function addSupportForMultipleDeliveryDestinations() {
+  if (await doesTableExist('users') && await doesTableContainColumn('users', 'email', 'TEXT')) {
+    /**
+     * users tables
+     */
+    await db.run('ALTER TABLE users ADD COLUMN checkin_destinations TEXT');
+    await db.run('ALTER TABLE users ADD COLUMN settings TEXT');
+
+    const allUsers = await db.all('SELECT id, email FROM users');
+    for (const { id, email } of allUsers) {
+      const checkinDestinations = {};
+      if (email) {
+        checkinDestinations.email = {
+          recipients: email,
+        };
+      }
+      await db.run("UPDATE users SET settings = '{}', checkin_destinations = ? WHERE id = ?",
+        JSON.stringify(checkinDestinations), id);
+    }
+    await db.run('ALTER TABLE users DROP COLUMN email');
+
+    /**
+     * messages table
+     */
+    await db.run('ALTER TABLE messages ADD COLUMN destinations TEXT');
+    await db.run('ALTER TABLE messages ADD COLUMN content TEXT');
+
+    const allMessages = await db.all('SELECT id, body, recipients, subject FROM messages');
+    for (const { id, body, recipients, subject } of allMessages) {
+      const destinations = {
+        email: {
+          recipients,
+          subject,
+        }
+      };
+      await db.run('UPDATE messages SET content = ?, destinations = ? WHERE id = ?', body, JSON.stringify(destinations), id);
+    }
+    await db.run('ALTER TABLE messages DROP COLUMN recipients');
+    await db.run('ALTER TABLE messages DROP COLUMN subject');
+    await db.run('ALTER TABLE messages DROP COLUMN body');
+  }
+}
+
 async function createTables() {
   await db.run(
     `PRAGMA foreign_keys = ON`);
@@ -94,25 +141,25 @@ async function createTables() {
     `CREATE TABLE IF NOT EXISTS users (
               id TEXT PRIMARY KEY,
               username TEXT,
-              email TEXT,
               password_hash TEXT,
               role TEXT,
               created_at TEXT,
-              last_checkin_at TEXT
+              last_checkin_at TEXT,
+              checkin_destinations TEXT,
+              settings TEXT
           )`);
   await db.run(
     `CREATE TABLE IF NOT EXISTS messages (
               id TEXT PRIMARY KEY,
               user_id TEXT,
-              recipients TEXT,
-              subject TEXT,
-              body TEXT,
+              content TEXT,
               encryption TEXT,
               custom_encryption_pass_hint TEXT,
               attachment_name TEXT,
               attachment_content BLOB,
               checkin_frequency_days INTEGER,
               checkin_waiting_days INTEGER,
+              destinations TEXT,
               FOREIGN KEY (user_id) 
                 REFERENCES users (id) 
                     ON DELETE CASCADE 

@@ -1,5 +1,7 @@
 extends layout
 
+include mixins/_errors
+
 block content
   h1.h2 Decrypt Message
   hr
@@ -15,9 +17,9 @@ block content
         div.col-md-3
           button.btn.btn-secondary.btn-block(type='submit') Decrypt Message
 
-  else if messageBody
+  else if messageContent
     dl.row
       dd.col-sm-12
-        pre= messageBody
+        pre= messageContent
 
-  include mixins/_errors
+  +showErrors(errors)

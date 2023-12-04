@@ -1,5 +1,7 @@
 extends layout
 
+include mixins/_errors
+
 block content
   form.login-form.text-center.form-vertical(method='post')
     fieldset
@@ -16,4 +18,4 @@ block content
       div.form-actions
         button.btn.btn-md.btn-block.btn-secondary(type='submit') Login
 
-      include mixins/_errors
+      +showErrors(errors)

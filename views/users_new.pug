@@ -1,5 +1,7 @@
 extends layout
 
+include mixins/_errors
+
 block content
   h1.h2 New User
   hr
@@ -7,10 +9,6 @@ block content
     div.form-group
       label(for='username') Username
       input.form-control(name='username', id='username', placeholder='Unique username', required, autofocus)
-
-    div.form-group
-      label(for='email') Email
-      input.form-control(name='email', id='email', placeholder='email1@gmail.com, email2@yahoo.com')
 
     div.form-group
       label(for='role') Role
@@ -32,4 +30,4 @@ block content
       div.col-md-3
         button.btn.btn-secondary.btn-block(type='submit') Save
 
-    include mixins/_errors
+    +showErrors(errors)

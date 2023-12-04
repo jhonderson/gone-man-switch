@@ -1,24 +1,10 @@
 const asyncHandler = require("express-async-handler");
 const systemService = require('../services/system');
-const emailsService = require('../services/emails');
-const usersService = require('../services/users');
 
 const systemSettings = sanitizeSystemSettings();
 
 exports.viewSystemSettings = asyncHandler(async (req, res, next) => {
   res.render('system', {title: 'System', ...systemSettings });
-});
-
-exports.sendTestEmail = asyncHandler(async (req, res, next) => {
-  const respose = { title: 'System', ...systemSettings };
-  const { email } = await usersService.getUser(req.session.userId);
-  try {
-    await emailsService.sendTestEmail(email);
-    respose.testEmailSentSuccessfully = true;
-  } catch (err) {
-    respose.errorSendingTestEmail = err.message;
-  }
-  res.render('system', respose);
 });
 
 function sanitizeSystemSettings() {

@@ -11,7 +11,8 @@ exports.listMessages = asyncHandler(async (req, res, next) => {
 
 exports.newMessage = asyncHandler(async (req, res, next) => {
   const user = await usersService.getUser(req.session.userId);
-  res.locals.userHasNoEmail = user && !user.email;
+  res.locals.userHasNoCheckinDestination = user
+    && (!user.checkinDestinations || !Object.keys(user.checkinDestinations).length);
   res.render('messages_new');
 });
 
@@ -21,22 +22,21 @@ exports.createMessage = asyncHandler(async (req, res, next) => {
     res.render('messages_new', { errors: validationResults.errors.map(error => error.msg) });
     return;
   }
-  const checkinFrequencyDays = convertTimeToDays(Number(req.body.checkinFrequencyTime), req.body.checkinFrequencyTimeUnit);
-  const checkinWaitingDays = convertTimeToDays(Number(req.body.checkinWaitingTime), req.body.checkinWaitingTimeUnit);
+  const checkinFrequencyDays = convertTimeToDays(Number(req.body.checkinFrequencyTime),
+    req.body.checkinFrequencyTimeUnit);
+  const checkinWaitingDays = convertTimeToDays(Number(req.body.checkinWaitingTime),
+    req.body.checkinWaitingTimeUnit);
+  const destinations = parseDestinations(req);
   try {
     await messagesService.createMessage({
       userId: req.session.userId,
-      recipients: req.body.recipients,
-      subject: req.body.subject,
-      body: req.body.body,
-      encryption: req.body.messageBodyEncryption,
+      content: req.body.content,
+      encryption: req.body.messageContentEncryption,
       customEncryptionPassword: req.body.customEncryptionPassword,
       customEncryptionPasswordHint: req.body.customEncryptionPasswordHint,
-      attachmentName: req.file?.originalname,
-      attachmentSize: req.file?.size,
-      attachmentContent: req.file?.buffer,
       checkinFrequencyDays,
-      checkinWaitingDays
+      checkinWaitingDays,
+      destinations,
     });
     res.redirect('/');
   } catch (err) {
@@ -56,11 +56,15 @@ exports.viewMessage = asyncHandler(async (req, res, next) => {
 exports.downloadAttachment = asyncHandler(async (req, res, next) => {
   const message = await messagesService.getMessage(req.params.messageId);
   if (message) {
-    const readStream = new (require('stream')).PassThrough();
-    readStream.end(message.attachmentContent);
-    res.set('Content-disposition', 'attachment; filename=' + message.attachmentName);
-    res.set('Content-Type', 'text/plain');
-    readStream.pipe(res);
+    if (message.destinations.email && message.destinations.email.attachmentContent) {
+      const readStream = new (require('stream')).PassThrough();
+      readStream.end(message.destinations.email.attachmentContent);
+      res.set('Content-disposition', 'attachment; filename=' + message.destinations.email.attachmentName);
+      res.set('Content-Type', 'text/plain');
+      readStream.pipe(res);
+    } else {
+      res.render('error', { title: 'Attachment not found', message: 'The message has no email attachment' });
+    }
   } else {
     res.render('error', { title: 'Message not found', message: `There is no message with id "${req.params.messageId}"` });
   }
@@ -100,21 +104,18 @@ exports.updateMessage = asyncHandler(async (req, res, next) => {
   }
   const checkinFrequencyDays = convertTimeToDays(Number(req.body.checkinFrequencyTime), req.body.checkinFrequencyTimeUnit);
   const checkinWaitingDays = convertTimeToDays(Number(req.body.checkinWaitingTime), req.body.checkinWaitingTimeUnit);
+  const destinations = parseDestinations(req);
   try {
     await messagesService.updateMessage({
       id: req.params.messageId,
       userId: req.session.userId,
-      recipients: req.body.recipients,
-      subject: req.body.subject,
-      body: req.body.body,
-      encryption: req.body.messageBodyEncryption,
+      content: req.body.content,
+      encryption: req.body.messageContentEncryption,
       customEncryptionPassword: req.body.customEncryptionPassword,
       customEncryptionPasswordHint: req.body.customEncryptionPasswordHint,
-      attachmentName: req.file?.originalname,
-      attachmentSize: req.file?.size,
-      attachmentContent: req.file?.buffer,
       checkinFrequencyDays,
-      checkinWaitingDays
+      checkinWaitingDays,
+      destinations,
     });
     res.redirect('/');
   } catch (err) {
@@ -139,8 +140,9 @@ exports.decryptMessage = asyncHandler(async (req, res, next) => {
     return;
   }
   try {
-    const messageBody = messagesService.decryptMessageBodyFromEncryptionPayload(req.body.encryptionPayload, req.body.encryptionPassword);
-    res.render('messages_decrypt', { messageBody });
+    const messageContent = messagesService.decryptMessageContentFromEncryptionPayload(
+      req.body.encryptionPayload, req.body.encryptionPassword);
+    res.render('messages_decrypt', { messageContent });
   } catch (err) {
     res.render('messages_decrypt', {
       encryptionPayload: req.body.encryptionPayload,
@@ -155,13 +157,15 @@ const getMessageInformationForDisplay = async(id) => {
     const { time: checkinFrequencyTime, timeUnit: checkinFrequencyTimeUnit } = convertDaysToTime(message.checkinFrequencyDays);
     const { time: checkinWaitingTime, timeUnit: checkinWaitingTimeUnit } = convertDaysToTime(message.checkinWaitingDays);
     const errors = [];
-    if (message.encryption == messagesService.MessageBodyEncryption.encrypted_system_encryption_password
-      && !message.body) {
-      // Message body field is mandatory, so if it's not present it means there was a problem decrypting its content
-      errors.push('Unable to decrypt message body, maybe the system message encryption password was changed recently?');
+    if (message.encryption == messagesService.MessageContentEncryption.encrypted_system_encryption_password
+      && !message.content) {
+      // Message content field is mandatory, so if it's not present it means there was a problem decrypting its content
+      errors.push('Unable to decrypt message content, maybe the system message encryption password was changed recently?');
     }
+    const flattenedDestinationFields = flatDestinations(message.destinations);
     return {
       ...message,
+      ...flattenedDestinationFields,
       checkinFrequencyTime,
       checkinFrequencyTimeUnit,
       checkinWaitingTime,
@@ -202,12 +206,60 @@ const convertDaysToTime = (days) => {
   }
 }
 
+const parseDestinations = (req) => {
+  const destinations = {};
+  if (req.body.emailRecipients) {
+    destinations.email = {
+      recipients: req.body.emailRecipients,
+      subject: req.body.emailSubject,
+      attachmentName: req.file?.originalname,
+      attachmentSize: req.file?.size,
+      attachmentContent: req.file?.buffer,
+    };
+  }
+  if (req.body.smsPhoneNumbers) {
+    destinations.sms = {
+      serviceProvider: req.body.smsServiceProvider,
+      phoneNumbers: req.body.smsPhoneNumbers,
+    };
+  }
+  if (req.body.telegramChatIds) {
+    destinations.telegram = {
+      parseMode: req.body.telegramParseMode.includes('Plain') ? undefined : req.body.telegramParseMode,
+      chatIds: req.body.telegramChatIds,
+    };
+  }
+  return destinations;
+}
+
+const flatDestinations = (destinations) => {
+  const flattenedDestinationFields = {
+    hasEmailDestination: !!destinations.email,
+    hasSMSDestination: !!destinations.sms,
+    hasTelegramDestination: !!destinations.telegram,
+  };
+  if (destinations.email) {
+    flattenedDestinationFields.emailRecipients = destinations.email.recipients;
+    flattenedDestinationFields.emailSubject = destinations.email.subject;
+    flattenedDestinationFields.emailAttachmentName = destinations.email.attachmentName;
+  }
+  if (destinations.sms) {
+    flattenedDestinationFields.smsServiceProvider = destinations.sms.serviceProvider;
+    flattenedDestinationFields.smsPhoneNumbers = destinations.sms.phoneNumbers;
+  }
+  if (destinations.telegram) {
+    flattenedDestinationFields.telegramParseMode = destinations.telegram.parseMode;
+    flattenedDestinationFields.telegramChatIds = destinations.telegram.chatIds;
+  }
+  return flattenedDestinationFields;
+}
+
 exports.messageCreationInputValidations = [
-  body('recipients', "Recipients information is mandatory").notEmpty(),
-  body('subject', 'Subject information is mandatory').notEmpty(),
-  body('body', 'Body information is mandatory').notEmpty(),
-  body('messageBodyEncryption', "Invalid encryption specified").isIn(Object.keys(messagesService.MessageBodyEncryption)),
-  body('customEncryptionPassword', "Custom encryption password is required").if(body('messageBodyEncryption').equals('encrypted_custom_encryption_password')).notEmpty(),
+  body('content', 'Message content is mandatory').notEmpty(),
+  body('messageContentEncryption', "Invalid encryption specified").isIn(Object.keys(messagesService.MessageContentEncryption)),
+  body('customEncryptionPassword', "Custom encryption password is required").if(body('messageContentEncryption').equals('encrypted_custom_encryption_password')).notEmpty(),
+  body('emailRecipients', "If you want to add an email destination you need to provide recipients and subject").if(body('emailSubject').notEmpty()).notEmpty(),
+  body('emailSubject', "If you want to add an email destination you need to provide recipients and subject").if(body('emailRecipients').notEmpty()).notEmpty(),
   body('checkinFrequencyTime', 'Provided check-in frequency time is not valid').isInt({ min: 1 }),
   body('checkinFrequencyTimeUnit', "Provided check-in frequency time unit is not valid").isIn(['Days', 'Months', 'Years']),
   body('checkinWaitingTime', 'Provided check-in waiting time is not valid').isInt({ min: 1 }),
@@ -215,11 +267,11 @@ exports.messageCreationInputValidations = [
 ];
 
 exports.messageUpdateInputValidations = [
-  body('recipients', "Recipients information is mandatory").notEmpty(),
-  body('subject', 'Subject information is mandatory').notEmpty(),
-  body('body', 'Body information is mandatory').if(body('messageBodyEncryption').not().equals('encrypted_custom_encryption_password')).notEmpty(),
-  body('messageBodyEncryption', "Invalid encryption specified").isIn(Object.keys(messagesService.MessageBodyEncryption)),
-  body('customEncryptionPassword', "Custom encryption password is required").if(body('messageBodyEncryption').equals('encrypted_custom_encryption_password')).if(body('body').notEmpty()).notEmpty(),
+  body('content', 'Message content is mandatory').if(body('messageContentEncryption').not().equals('encrypted_custom_encryption_password')).notEmpty(),
+  body('messageContentEncryption', "Invalid encryption specified").isIn(Object.keys(messagesService.MessageContentEncryption)),
+  body('customEncryptionPassword', "Custom encryption password is required").if(body('messageContentEncryption').equals('encrypted_custom_encryption_password')).if(body('content').notEmpty()).notEmpty(),
+  body('emailRecipients', "If you want to add an email destination you need to provide recipients and subject").if(body('emailSubject').notEmpty()).notEmpty(),
+  body('emailSubject', "If you want to add an email destination you need to provide recipients and subject").if(body('emailRecipients').notEmpty()).notEmpty(),
   body('checkinFrequencyTime', 'Provided check-in frequency time is not valid').isInt({ min: 1 }),
   body('checkinFrequencyTimeUnit', "Provided check-in frequency time unit is not valid").isIn(['Days', 'Months', 'Years']),
   body('checkinWaitingTime', 'Provided check-in waiting time is not valid').isInt({ min: 1 }),

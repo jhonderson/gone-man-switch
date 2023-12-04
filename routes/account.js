@@ -9,6 +9,16 @@ router.post("/login", accountController.loginInputValidations, accountController
 router.get("/logout", [authMiddleware.requireLoggedIn], accountController.logout);
 
 router.get("/", [authMiddleware.requireLoggedIn], accountController.editAccount);
-router.post("/", [authMiddleware.requireLoggedIn, ...accountController.accountInputValidations], accountController.updateAccount);
+router.post("/", [authMiddleware.requireLoggedIn,
+  ...accountController.accountInputValidations], accountController.updateAccount);
+
+router.post("/checkinDestinations", [authMiddleware.requireLoggedIn], accountController.updateCheckinDestinations);
+router.post("/settings", [authMiddleware.requireLoggedIn], accountController.updateSettings);
+router.post("/sendTestEmail", [authMiddleware.requireLoggedIn,
+  ...accountController.sendTestEmailInputValidations], accountController.sendTestEmail);
+router.post("/sendTestSMSMessage", [authMiddleware.requireLoggedIn,
+  ...accountController.sendTestSMSMessageInputValidations], accountController.sendTestSMSMessage);
+router.post("/sendTestTelegramMessage", [authMiddleware.requireLoggedIn,
+  ...accountController.sendTestTelegramMessageInputValidations], accountController.sendTestTelegramMessage);
 
 module.exports = router;

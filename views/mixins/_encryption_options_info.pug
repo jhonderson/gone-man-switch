@@ -8,18 +8,18 @@ div.card.card-body
             th Option
             th Description
             th Recipients receive
-            th Message body is stored internally as
-            th Can the system decrypt the message body by itself?
+            th Message content is stored internally as
+            th Can the system decrypt the message content by itself?
         tbody
           tr
             td
               strong Unencrypted
             td
-              |  The message body is stored as plain text in the system database.
+              |  The message content is stored as plain text in the system database.
               |  Use this option if you are not sending sensitive information such
               |  as passwords, or if you are confident that nobody will have access
               |  to the system's database.
-            td The same message you type in the body field
+            td The same message you type in the content field
             td Plain text in the database
             td Yes
               | #{' '}
@@ -28,22 +28,22 @@ div.card.card-body
             td
               strong Encrypt using system encryption password
             td
-              |  The message body is stored in encrypted format in the system database.
+              |  The message content is stored in encrypted format in the system database.
               |  The encryption password comes from the system environment variable
               code  MESSAGE_ENCRYPTION_PASSWORD.
               |  This adds a layer of protection in
-              |  the sense that to be able to read the message body the intruder
+              |  the sense that to be able to read the message content the intruder
               |  would not only need to have access to the system's database, but also to
               |  the system environment variables, and know the system's
               |  encryption logic.
-            td The same message you type in the body field
+            td The same message you type in the content field
             td Encrypted format in the database
             td Yes
           tr
             td
               strong Encrypt using custom encryption password
             td
-              |  The message body is stored in encrypted format in the system database.
+              |  The message content is stored in encrypted format in the system database.
               |  The encryption password comes from the user when creating/updating the message. Because
               |  this encryption password is not stored anywhere, the recipients will have to
               |  enter this encryption password when reading the message.
@@ -53,6 +53,6 @@ div.card.card-body
             td
               | A standard message containing a link to decrypt the message and the encryption password hint.
               | Once the recipient opens the link, the system will ask for the encryption password and then show
-              | the message body content
+              | the message content content
             td Encrypted format in the database
             td No

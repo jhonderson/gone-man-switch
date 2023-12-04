@@ -5,7 +5,6 @@ block content
   p For each setting you'll see a descriptive name, the current setting's value,
     |  and the system environment variable you can use to change it.
 
-
   h1.h3.mb-3.font-weight-normal SMTP
 
   dl.row
@@ -38,17 +37,6 @@ block content
     dd.col-sm-4= smtp.authMechanism || '(empty)'
     dd.col-sm-4
       i SMTP_AUTH_MECHANISM
-
-  form(method='post', action='/system/sendTestEmail')
-    div.row
-      div.col-md-3
-        button.btn.btn-md.btn-block.btn-secondary(type='submit') Send Test Email
-  if errorSendingTestEmail
-    br
-    div.alert.alert-danger #{errorSendingTestEmail}
-  else if testEmailSentSuccessfully
-    br
-    div.alert.alert-dark Test email sent successfully
 
   h1.h3.mb-3.font-weight-normal Check-in
 

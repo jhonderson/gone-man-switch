@@ -1,32 +1,61 @@
 extends layout
 
+include mixins/_errors
+
 block content
   h1.h2 View Message
 
   hr
-  h1.h3.mb-3.font-weight-normal Content
+  h1.h3.mb-3.font-weight-normal Message
 
   dl.row
-    dt.col.sm-2 Recipients
-    dd.col-sm-10= message.recipients
-  dl.row
-    dt.col.sm-2 Subject
-    dd.col-sm-10= message.subject
-  dl.row
-    dt.col.sm-2 Body
+    dt.col.sm-3 Content
     if message.encryption == 'encrypted_custom_encryption_password'
-      dd.col-sm-10
+      dd.col-sm-9
         a.text-muted(href='/messages/decrypt/' + message.encryptionPayload, target='_blank')
-          | Decrypt Message Body
+          | Decrypt Message Content
           | #{' '}
           i.fa.fa-external-link(arial-hidden)
     else
-      dd.col-sm-10
-        pre= message.body
-  dl.row
-    dt.col.sm-2 Attachment
-    dd.col-sm-10
-      a.text-muted(href='/messages/' + message.id + '/attachment/download')= message.attachmentName
+      dd.col-sm-9
+        pre= message.content
+
+  hr
+  h1.h3.mb-3.font-weight-normal Destinations
+
+  if message.hasEmailDestination
+    h1.h5.mb-3.font-weight-normal Email
+
+    dl.row
+      dt.col.sm-3 Recipients
+      dd.col-sm-9= message.emailRecipients
+    dl.row
+      dt.col.sm-3 Subject
+      dd.col-sm-9= message.emailSubject
+    dl.row
+      dt.col.sm-3 Attachment
+      dd.col-sm-9
+        a.text-muted(href='/messages/' + message.id + '/attachment/download')= message.emailAttachmentName
+
+  if message.hasSMSDestination
+    h1.h5.mb-3.font-weight-normal SMS
+
+    dl.row
+      dt.col.sm-3 Service Provider
+      dd.col-sm-9= message.smsServiceProvider
+    dl.row
+      dt.col.sm-3 Phone Numbers
+      dd.col-sm-9= message.smsPhoneNumbers
+
+  if message.hasTelegramDestination
+    h1.h5.mb-3.font-weight-normal Telegram
+
+    dl.row
+      dt.col.sm-3 Message Format
+      dd.col-sm-9= message.telegramParseMode
+    dl.row
+      dt.col.sm-3 Chat Ids
+      dd.col-sm-9= message.telegramChatIds
 
   hr
   h1.h3.mb-3.font-weight-normal Check-in Configuration
@@ -44,4 +73,4 @@ block content
     div.col-md-3
       a.btn.btn-md.btn-block.btn-secondary(role='button', href='/') Back to Messages
 
-  include mixins/_message_errors
+  +showErrors(message.errors)

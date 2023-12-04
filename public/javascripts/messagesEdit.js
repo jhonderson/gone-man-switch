@@ -1,6 +1,6 @@
 
-const encryptionOptions = document.getElementsByName('messageBodyEncryption');
-const messageBody = document.getElementById('body');
+const encryptionOptions = document.getElementsByName('messageContentEncryption');
+const messageContent = getMessageContentElement();
 
 encryptionOptions.forEach(encryptionOption => {
   encryptionOption.addEventListener('change', (event) => {
@@ -8,15 +8,15 @@ encryptionOptions.forEach(encryptionOption => {
   });
 });
 
-messageBody.addEventListener('change', (event) => {
+messageContent.addEventListener('change', (event) => {
   if (isCustomEncryptionOptionSelected() && isStoredMessageEncryptedUsingCustomEncryptionPassword()) {
-    const isMessageBodyEmpty = !event.currentTarget.value
-    if (isMessageBodyEmpty) {
-      // If body is empty there is no need to require an encryption password
-      // since the body won't be overriden
+    const isMessageContentEmpty = !event.currentTarget.value
+    if (isMessageContentEmpty) {
+      // If content is empty there is no need to require an encryption password
+      // since the content won't be overriden
       document.getElementById('customEncryptionPassword').removeAttribute('required');
     } else {
-      // If the user wants to override the body then the encryption password needs to be provided
+      // If the user wants to override the content then the encryption password needs to be provided
       document.getElementById('customEncryptionPassword').setAttribute('required', true);
     }
   }
@@ -25,15 +25,15 @@ messageBody.addEventListener('change', (event) => {
 function encryptionOptionChanged(newValue) {
   if (newValue == 'encrypted_custom_encryption_password') {
     if (isStoredMessageEncryptedUsingCustomEncryptionPassword()) {
-      // If the store message is encrypted using custom encryption, no need to require the body
+      // If the store message is encrypted using custom encryption, no need to require the content
       // since it doesn't have to be updated
-      document.getElementById('body').removeAttribute('required');
-      if (isMessageBodyEmpty()) {
-        // If body is empty there is no need to require an encryption password
-        // since the body won't be overriden
+      getMessageContentElement().removeAttribute('required');
+      if (isMessageContentEmpty()) {
+        // If content is empty there is no need to require an encryption password
+        // since the content won't be overriden
         document.getElementById('customEncryptionPassword').removeAttribute('required');
       } else {
-        // If the user wants to override the body then the encryption password needs to be provided
+        // If the user wants to override the content then the encryption password needs to be provided
         document.getElementById('customEncryptionPassword').setAttribute('required', true);
       }
     } else {
@@ -42,7 +42,7 @@ function encryptionOptionChanged(newValue) {
     document.getElementById('customEncryptionPasswordGroup').removeAttribute('hidden');
     document.getElementById('customEncryptionPasswordHintGroup').removeAttribute('hidden');
   } else {
-    document.getElementById('body').setAttribute('required', true);
+    getMessageContentElement().setAttribute('required', true);
     document.getElementById('customEncryptionPasswordGroup').setAttribute('hidden', true);
     document.getElementById('customEncryptionPasswordHintGroup').setAttribute('hidden', true);
     document.getElementById('customEncryptionPassword').removeAttribute('required');
@@ -55,10 +55,14 @@ function isCustomEncryptionOptionSelected() {
 }
 
 function isStoredMessageEncryptedUsingCustomEncryptionPassword() {
-  // If the 'Decrypt Message Body' is present, the stored message is encrypted using custom encryption password
-  return !!document.getElementById('decryptMessageBodyLink');
+  // If the 'Decrypt Message Content' is present, the stored message is encrypted using custom encryption password
+  return !!document.getElementById('decryptMessageContentLink');
 }
 
-function isMessageBodyEmpty() {
-  return !document.getElementById('body').value;
+function isMessageContentEmpty() {
+  return !(getMessageContentElement().value);
+}
+
+function getMessageContentElement() {
+  return document.getElementById('content');
 }

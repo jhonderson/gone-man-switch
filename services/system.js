@@ -24,17 +24,17 @@ const getSystemSettings = () => {
     },
     checkin: {
       serverUrl: (process.env.SERVER_URL || `http://localhost:${process.env.PORT || 3000}`).replace(/\/$/, ""),
-      checkinNotificationsJobCron: process.env.CHECKIN_NOTIFICATIONS_JOB_CRON || '0 8 * * *',
-      messagesJobCron: process.env.MESSAGES_JOB_CRON || '0 8 * * *',
+      checkinNotificationsJobCron: process.env.CHECKIN_NOTIFICATIONS_JOB_CRON || '0 18 * * *',
+      messagesJobCron: process.env.MESSAGES_JOB_CRON || '0 18 * * *',
       email: {
         subject: "Gone Man's Switch - Check-in Notification",
-        bodyFormat: 'Hello,\n\nCould you please confirm you are still available using the following link?: %s\n\nThanks!',
+        bodyFormat: "Hello,\n\nCould you please confirm you are still available using the following link?: %s\n\nThanks,\nGone Man's Switch",
       }
     },
     message: {
       maxAttachmentSizeInMB: 20,
       encryptionPassword: process.env.MESSAGE_ENCRYPTION_PASSWORD,
-      customEncryptionBodyFormat: 'Hello,\n\nYou received an encrypted message from a close one (see the subject for more information), please decrypt it using the following link: %s\n\nSince you will be asked an encryption password, this is the encryption password hint "%s"\n\nThanks!',
+      customEncryptionBodyFormat: 'Hello,\n\nYou received an important encrypted message from someone you know, please decrypt it using the link provided below. You will be asked for a password to decrypt the message, please use the password hint below to guess the password:\n\n - Link: %s\n - Encryption Password Hint: "%s"\n\nRegards',
     },
     cookieSession: {
       secret: process.env.COOKIE_SESSION_SECRET || 'default-gonemanswitch-session-cookie-secret',
@@ -42,7 +42,6 @@ const getSystemSettings = () => {
     },
     defaultUser: {
       username: 'admin',
-      email: process.env.DEFAULT_ADMIN_USER_EMAIL,
       password: process.env.DEFAULT_ADMIN_USER_PASSWORD || 'password',
     }
   };

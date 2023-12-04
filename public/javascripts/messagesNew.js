@@ -1,5 +1,5 @@
 
-const encryptionOptions = document.getElementsByName('messageBodyEncryption');
+const encryptionOptions = document.getElementsByName('messageContentEncryption');
 
 encryptionOptions.forEach(encryptionOption => {
   encryptionOption.addEventListener('change', (event) => {

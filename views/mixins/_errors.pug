@@ -1,3 +1,5 @@
-br
-each error in errors? errors : []
-  div.alert.alert-danger #{error}
+mixin showErrors(errors)
+  if errors && errors.length
+    br
+  each error in errors? errors : []
+    div.alert.alert-danger #{error}
