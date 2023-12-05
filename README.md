@@ -7,6 +7,7 @@ Topics in this page:
 - [Installation Setup](#installation--setup)
 - [Local Development](#local-development)
 - [Documentation](#documentation)
+- [Say Thanks](#say-thanks)
 - [FAQ](#faq)
 - [Screenshots](#screenshots)
 
@@ -240,6 +241,12 @@ Using the system module you can see the current system settings configured throu
 Using the users module you create, edit and delete users. New users can login and user the system too. There are 2 type of users:
 - `ADMIN`: They can create and manage messages, update their account, and access the modules Users and System, meaning they can manage users, see the system information, and send test emails.
 - `USER`: They can create and manage messages, and update their account.
+
+## Say Thanks
+
+Do you find the project useful? consider giving it a ⭐, contributing to the project or buying me a coffee.
+
+<a href="https://www.buymeacoffee.com/jhonderson" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" style="height: 50px !important;width: 180px !important;" ></a>
 
 ## FAQ
 

@@ -2,7 +2,7 @@ extends layout
 
 block content
   h1.h2 Messages
-  p Welcome to Gone Man's Switch! This is a simple web application that allows you to create messages that will be delivered by email in the event you are absent (gone) for a certain period.
+  p Welcome to Gone Man's Switch! This is a simple web application that allows you to create messages that will be delivered when you are absent (gone) for a certain period.
   p Here you can manage your messages.
 
   div.row
@@ -44,4 +44,4 @@ block content
                   | !{' | '}
                   a.text-muted(href='/messages/' + message.id + '/delete') Delete
   else
-    div.alert.alert-secondary You haven't created any messages yet.
+    div.alert.alert-secondary You have no messages.
