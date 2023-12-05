@@ -1,6 +1,7 @@
 extends layout
 
 include mixins/_errors
+include mixins/_documentation_link
 
 block content
   h1.h2 Account
@@ -78,11 +79,7 @@ block content
       div.form-group
         label(for='telegramChatIds') Chat Ids
         input.form-control(name='telegramChatIds', id='telegramChatIds', placeholder='1155263894, 8416319852', value=user.telegramChatIds)
-        div.form-group
-          small.text-muted
-            | See how to get Telegram Chat Ids in our 
-            a.text-muted.collapsed(data-toggle='collapse', href='https://github.com/jhonderson/gone-man-switch/tree/v0.1.4#telegram')
-              strong Github Docs
+        +showDocumentationLink('v0.1.4', '#telegram', "See how to get Telegram Chat Ids here")
 
 
     div.row
@@ -170,11 +167,7 @@ block content
             div.form-group
               small.text-muted Telegram Bot Token was already provided by you, there's no need to enter it again unless you want to change it
           else
-            div.form-group
-              small.text-muted
-                | See how to get a Telegram Bot Token in our 
-                a.text-muted.collapsed(data-toggle='collapse', href='https://github.com/jhonderson/gone-man-switch/tree/v0.1.4#telegram')
-                  strong Github Docs
+            +showDocumentationLink('v0.1.4', '#telegram', "See how to get a Telegram Bot Token here")
 
     div.row
       div.col-md-3
