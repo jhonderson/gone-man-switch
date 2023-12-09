@@ -24,7 +24,7 @@ const getSystemSettings = () => {
     },
     checkin: {
       serverUrl: (process.env.SERVER_URL || `http://localhost:${process.env.PORT || 3000}`).replace(/\/$/, ""),
-      checkinNotificationsJobCron: process.env.CHECKIN_NOTIFICATIONS_JOB_CRON || '0 18 * * *',
+      checkinNotificationsJobCron: process.env.CHECKIN_NOTIFICATIONS_JOB_CRON || '0 17 * * *',
       messagesJobCron: process.env.MESSAGES_JOB_CRON || '0 18 * * *',
       email: {
         subject: "Gone Man's Switch - Check-in Notification",

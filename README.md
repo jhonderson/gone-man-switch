@@ -78,13 +78,13 @@ However, for the system to be fully functional we recommend completing the follo
   - `MESSAGE_ENCRYPTION_PASSWORD`: Encryption password used to encrypt the content of messages for which encryption was configured as **Encrypt using system encryption password**. Any secret string will sufice
 
 Additional environment variables you can configure:
-- `DEFAULT_ADMIN_USER_PASSWORD`: Password of the default user/account created by the system the first time it starts
-- `COOKIE_SESSION_MAX_AGE_DAYS`: Maximum number of days the session will last
+- `DEFAULT_ADMIN_USER_PASSWORD`: Password of the default user/account created by the system the first time it starts. Default value is `password`
+- `COOKIE_SESSION_MAX_AGE_DAYS`: Maximum number of days the session will last. Default value is 2 days
 - `SQLITE_DB_PATH`: SQLite database path
-- `CHECKIN_NOTIFICATIONS_JOB_CRON`: [Cron schedule expression](https://www.npmjs.com/package/node-schedule#cron-style-scheduling) for the job that sends check-in notifications. It runs daily at 6:00 pm UTC by default (`0 18 * * *`)
+- `CHECKIN_NOTIFICATIONS_JOB_CRON`: [Cron schedule expression](https://www.npmjs.com/package/node-schedule#cron-style-scheduling) for the job that sends check-in notifications. It runs daily at 6:00 pm UTC by default (`0 17 * * *`)
 - `MESSAGES_JOB_CRON`: [Cron schedule expression](https://www.npmjs.com/package/node-schedule#cron-style-scheduling) for the job that delivers messages. It runs daily at 6:00 pm UTC by default (`0 18 * * *`)
 
-Unless you plan to respond to your registration notifications from your local network, we recommend exposing this web application to the public using a reverse proxy and your custom domain provider.
+Unless you plan to respond to your check-in notifications from within your local network, we recommend exposing this web application to the public using a reverse proxy and your custom domain provider.
 
 ## Local Development
 
@@ -274,6 +274,13 @@ After 6 months of absence (you don't login to Gone Man's Switch) you will receiv
 Then 2 things may happen:
 1. If you confirm the notification by clicking the link within 10 days of receiving it, the message won't be delivered and you will get another notification 6 months later.
 1. If you do not confirm the notification within 10 days of receiving it, the message will be delivered to the recipients via email (to `bob@hotmail.com, lily@gmail.com`) and deleted from the system. 
+
+### My check-in notifications/messages are not being delievered
+
+1. Make sure your delivery destination settings are valid by sending a testing email, sms or telegram message
+2. Check the system logs by running `docker logs gonemanswitch`. All important messages, including errors, will be in the logs. For instance, the message `Message with id xxx could not be delivered` means that there was a problem delivering your message, and you will also see more details about the problem: `Error delivering message by SMS: <more details>`.
+3. Keep in mind is that every time you interact with the website (I.e you open the website while logged in), the system will interprete that as you being available and will mark your checkin notifications as acknowledged. So for a message to be delivered you need to stop interacting with the website for as long as the time period you configure in the message section *Send me a check-in notification if I am absent for more than...*, plus the time period at *Deliver this message if I don't respond to my check-in notification after...*
+4. There could be 1 day of delay in receiving your check-in notification: Let's say you create a message on December 9th, specifying that you want to receive check-in notifications if you are absent for more than **1 day**. Let's also say that you logout the same day at 5:01 pm UTC and you stop interacting with the system. By default the check-in notifications job will run on December 10th at 5:00 pm UTC, but since it hasn't been a day since your last interaction, but 23 hours and 59 minutes only, the check-in notification won't be delivered on December 10th as you would expect, and it will be delivered on December 11th 5:00 pm instead.
 
 ### What happens to the message information once it is delivered?
 
