@@ -81,7 +81,7 @@ Additional environment variables you can configure:
 - `DEFAULT_ADMIN_USER_PASSWORD`: Password of the default user/account created by the system the first time it starts. Default value is `password`
 - `COOKIE_SESSION_MAX_AGE_DAYS`: Maximum number of days the session will last. Default value is 2 days
 - `SQLITE_DB_PATH`: SQLite database path
-- `CHECKIN_NOTIFICATIONS_JOB_CRON`: [Cron schedule expression](https://www.npmjs.com/package/node-schedule#cron-style-scheduling) for the job that sends check-in notifications. It runs daily at 6:00 pm UTC by default (`0 17 * * *`)
+- `CHECKIN_NOTIFICATIONS_JOB_CRON`: [Cron schedule expression](https://www.npmjs.com/package/node-schedule#cron-style-scheduling) for the job that sends check-in notifications. It runs daily at 5:00 pm UTC by default (`0 17 * * *`)
 - `MESSAGES_JOB_CRON`: [Cron schedule expression](https://www.npmjs.com/package/node-schedule#cron-style-scheduling) for the job that delivers messages. It runs daily at 6:00 pm UTC by default (`0 18 * * *`)
 
 Unless you plan to respond to your check-in notifications from within your local network, we recommend exposing this web application to the public using a reverse proxy and your custom domain provider.
