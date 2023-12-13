@@ -11,4 +11,14 @@
         if role == 'ADMIN'
           a.p-2.text-muted(href='/users') Users
           a.p-2.text-muted(href='/system') System
-        a.p-2.text-muted(href='/account/logout') Logout (#{username})
+        div
+          a.p-2.text-muted(href='/account/logout') Logout (#{username})
+          button.btn.btn-md.dark-mode-button.text-muted(id='toggle-darkmode')
+            i.fa.fa-moon-o(id='toggle-darkmode-moon-icon', arial-hidden)
+            i.fa.fa-sun-o(id='toggle-darkmode-sun-icon', arial-hidden)
+  else
+    .nav-scroller.py-1.mb-2
+      nav.nav.d-flex.float-right
+        button.btn.btn-md.dark-mode-button.text-muted(id='toggle-darkmode')
+          i.fa.fa-moon-o(id='toggle-darkmode-moon-icon', arial-hidden)
+          i.fa.fa-sun-o(id='toggle-darkmode-sun-icon', arial-hidden)

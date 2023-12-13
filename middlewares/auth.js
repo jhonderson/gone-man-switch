@@ -25,7 +25,7 @@ const requireAdminRole = async (req, res, next) => {
   } else if (req.session.role == 'ADMIN') {
     next();
   } else {
-    res.status(401).render('error', { title: 'Unauthorized', message: 'Only admin users have acecss to this resource' });
+    res.status(401).render('error', { title: 'Unauthorized', message: 'Only ADMIN users have access to this resource' });
   }
 }
 
