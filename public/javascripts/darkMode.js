@@ -21,14 +21,6 @@ function toggleDarkMode(enableDarkMode) {
   }
 }
 
-function toggleElementVisibility(element) {
-  if (element.style.display === "none") {
-    element.style.display = "block";
-  } else {
-    element.style.display = "none";
-  }
-}
-
 function initializeDarkMode() {
   const userPreference = loadUserPreference();
  
