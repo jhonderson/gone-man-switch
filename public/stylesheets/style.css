@@ -18,7 +18,7 @@
   --alert-warning-background-color: #fff3cd;
   --alert-danger-color: #721c24;
   --alert-danger-background-color: #f8d7da;
-  --alert-danger-border-color: #f5c6cb;;
+  --alert-danger-border-color: #f5c6cb;
 }
 
 .site-header {
@@ -130,6 +130,10 @@ a.text-dark:hover {
   color: var(--alert-danger-color);
   background-color: var(--alert-danger-background-color);
   border-color: var(--alert-danger-border-color);
+}
+
+pre {
+  color: var(--color);
 }
 
 .dark-mode {
