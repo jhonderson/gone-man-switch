@@ -121,17 +121,17 @@ const updateUserSettings = async (id, settings) => {
   const currentSettings = JSON.parse(currentSettingsStr);
   if (currentSettings.smtp && currentSettings.smtp.password) {
     settings.smtp = settings.smtp || {};
-    settings.smtp.password = currentSettings.smtp?.password;
+    settings.smtp.password ||= currentSettings.smtp?.password;
   }
   if (currentSettings.sms && currentSettings.sms.twilio
     && currentSettings.sms.twilio.authToken) {
     settings.sms = settings.sms || {};
     settings.sms.twilio = settings.sms.twilio || {};
-    settings.sms.twilio.authToken = currentSettings.sms.twilio.authToken;
+    settings.sms.twilio.authToken ||= currentSettings.sms.twilio.authToken;
   }
   if (currentSettings.telegram && currentSettings.telegram.botToken) {
     settings.telegram = settings.telegram || {};
-    settings.telegram.botToken = currentSettings.telegram.botToken;
+    settings.telegram.botToken ||= currentSettings.telegram.botToken;
   }
   await getDb().run("UPDATE users SET settings = ? WHERE id = ?",
     JSON.stringify(settings), id);
