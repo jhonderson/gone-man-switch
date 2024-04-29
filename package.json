@@ -10,7 +10,7 @@
     "cookie-parser": "~1.4.6",
     "cookie-session": "^2.0.0",
     "debug": "~4.3.4",
-    "express": "~4.18.2",
+    "express": "^4.19.2",
     "express-async-handler": "^1.2.0",
     "express-validator": "^7.0.1",
     "http-errors": "~2.0.0",
