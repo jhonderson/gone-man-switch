@@ -9,6 +9,7 @@
   --form-control-color: #495057;
   --form-control-background-color: #ffffff;
   --table-color: #212529;
+  --card-background-color: #ffffff;
   --toggle-theme-button-color: #000;
   --dark-mode-moon-icon-display: block;
   --dark-mode-sun-icon-display: none;
@@ -103,6 +104,10 @@ a.text-dark:hover {
   color: var(--table-color);
 }
 
+.card {
+  background-color: var(--card-background-color);
+}
+
 .dark-mode-button {
   background-color: transparent;
   color: var(--toggle-theme-button-color);
@@ -147,6 +152,7 @@ pre {
   --form-control-color: #ffffff;
   --form-control-background-color: #343434;
   --table-color: #ffffff;
+  --card-background-color: #1b1b1b;
   --toggle-theme-button-color: #ffffff;
   --dark-mode-moon-icon-display: 'none';
   --dark-mode-sun-icon-display: 'block';
