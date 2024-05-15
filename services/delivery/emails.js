@@ -16,19 +16,27 @@ const areEmailRecipientsValid = (recipients) => {
 };
 
 const sendEmail = async ({ host, port, secure, from, username, authMechanism, password }, { recipients, subject, body, attachments }) => {
-  if (!host || !port || !from || !authMechanism || !username || !password) {
+  if (!host || !port || !from) {
     throw new Error("Can't send email because some required SMTP settings are missing");
   }
+
   const transporter = nodemailer.createTransport({
     host,
     port,
     secure,
-    auth: {
-      type: authMechanism,
-      user: username,
-      pass: password,
-    },
   });
+  if (authMechanism && username && password) {
+    const transporter = nodemailer.createTransport({
+      host,
+      port,
+      secure,
+      auth: {
+        type: authMechanism,
+        user: username,
+        pass: password,
+      },
+    });
+  }
 
   var mailOptions = {
     from,
